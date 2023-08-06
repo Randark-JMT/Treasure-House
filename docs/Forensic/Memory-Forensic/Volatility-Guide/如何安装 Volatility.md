@@ -1,15 +1,18 @@
 # 如何安装 Volatility
 
-!!! info 基础环境
-    这里用作演示的系统为`Ubuntu-22.04-desktop-amd64` ，安装参数为选择了最小安装。其它系统也可以，但是还是建议新版本 Ubuntu，毕竟出了问题修起来也容易
-    对于虚拟机而言，建议 CPU 开到 2 核左右，内存在 2G 左右，而硬盘建议开到 40G 动态磁盘（一般情况下足够容纳 Ubuntu 主体+2~3 个内存镜像）
+:::info 基础环境
+这里用作演示的系统为`Ubuntu-22.04-desktop-amd64` ，安装参数为选择了最小安装。其它系统也可以，但是还是建议新版本 Ubuntu，毕竟出了问题修起来也容易
 
-    需要注意的是，`Volatility`受限于 Python 架构，实际上无论镜像文件有多大有多难分析，`Volatility`都是单核应用，所以不需要启用过多的虚拟化核心
+对于虚拟机而言，建议 CPU 开到 2 核左右，内存在 2G 左右，而硬盘建议开到 40G 动态磁盘（一般情况下足够容纳 Ubuntu 主体+2~3 个内存镜像）
 
-!!! caution Windows - cmd 可能会出现问题
+需要注意的是，`Volatility`受限于 Python 架构，实际上无论镜像文件有多大有多难分析，`Volatility`都是单核应用，所以不需要启用过多的虚拟化核心
+:::
 
-    本人建议这类环境是基于 Linux（本人推荐 Ubuntu），使用 Windows 来开展工作也可以
-    另外需要注意的是，`Volatility 3`在 Windows 的 cmd 中无法执行，因为`Volatility 3`所绑定的指令是 vol，这与 cmd 中自带的指令发生冲突（vol in cmd：显示磁盘卷标和序列号（如果存在）），故如果要在 Windows 环境中使用`Volatility 3`，需要使用非 cmd 终端（例如 Powershell）
+:::caution Windows - cmd 可能会出现问题
+本人建议这类环境是基于 Linux（本人推荐 Ubuntu），使用 Windows 来开展工作也可以
+
+另外需要注意的是，`Volatility 3`在 Windows 的 cmd 中无法执行，因为`Volatility 3`所绑定的指令是 vol，这与 cmd 中自带的指令发生冲突（vol in cmd：显示磁盘卷标和序列号（如果存在）），故如果要在 Windows 环境中使用`Volatility 3`，需要使用非 cmd 终端（例如 Powershell）
+:::
 
 ## 关于网络问题
 
@@ -21,9 +24,9 @@
 
 ## 安装 Volatility 2
 
-!!! info 使用提示
-
-    可以从 `Volatility 2` 的官方仓库中发现，其实官方的用法就是直接`python2 vol.py` 所以对于 `Volatility 2` 而言，是可以直接从原始的 Python 代码直接运行的，但是如果想要安装的话，也是可以的。
+:::info 使用提示
+可以从 `Volatility 2` 的官方仓库中发现，其实官方的用法就是直接`python2 vol.py` 所以对于 `Volatility 2` 而言，是可以直接从原始的 Python 代码直接运行的，但是如果想要安装的话，也是可以的。
+:::
 
 ### 获取 Volatility 2 源码
 
@@ -39,9 +42,9 @@
 
 ### 配置 Python2 环境
 
-!!! info 请注意
-
-    新版本 Ubuntu 中已经不再预装 Python2 环境，需要手动安装
+:::info 请注意
+新版本 Ubuntu 中已经不再预装 Python2 环境，需要手动安装
+:::
 
 ```shell
 sudo apt install python2
@@ -53,9 +56,9 @@ sudo apt install python2
 
 ![检查 Volatility 2 运行情况](img/image_20230735-103549.png)
 
-!!! info 请注意
-
-    即使有报错，也说明可以运行，因为额外的第三方库还没有安装，所以出现报错是正常的
+:::info 请注意
+即使有报错，也说明可以运行，因为额外的第三方库还没有安装，所以出现报错是正常的
+:::
 
 接下来，就是需要处理运行时所体现的报错信息。第一步，便是安装 python2 的包管理器 pip，执行以下命令
 
@@ -131,12 +134,13 @@ vol.py
 
 [Python3 - volatility3 in Pypi](https://pypi.org/project/volatility3/)
 
-!!! caution python 2 & 3 环境冲突问题
+:::caution python 2 & 3 环境冲突问题
+需要注意的是，Linux 系统中，允许 Python2 与 Python3 环境并存，但是二者的依赖库（python-dev）和第三方包（通过 pip 包管理器安装的第三方包）并不会共享，也就意味着如果如上文安装好 Vol 2 之后，相关操作也要再重复一遍
 
-    需要注意的是，Linux 系统中，允许 Python2 与 Python3 环境并存，但是二者的依赖库（python-dev）和第三方包（通过 pip 包管理器安装的第三方包）并不会共享，也就意味着如果如上文安装好 Vol 2 之后，相关操作也要再重复一遍
+另外需要注意的是，python-pip 和 python3-pip 两个包管理器无法通过 apt 来同时存在，如果需要两个版本的 pip 共存的话，请考虑一个手动安装一个用 apt 安装，或者直接两个都手动安装
 
-    另外需要注意的是，python-pip 和 python3-pip 两个包管理器无法通过 apt 来同时存在，如果需要两个版本的 pip 共存的话，请考虑一个手动安装一个用 apt 安装，或者直接两个都手动安装
-    相关操作可以参考：[使用 get-pip.py 安装 python2 的 pip](https://blog.csdn.net/qq_42533216/article/details/120672856)
+相关操作可以参考：[使用 get-pip.py 安装 python2 的 pip](https://blog.csdn.net/qq_42533216/article/details/120672856)
+:::
 
 ### 配置 Python3 环境
 
@@ -148,9 +152,9 @@ sudo apt install python3-pip
 
 ![安装 python3-pip](img/image_20230700-110001.png)
 
-!!! info 环境冲突
-
-    这里就可以看到，在已经通过 apt 安装 python-pip 的情况下，再通过 apt 安装 python3-pip，apt 就会检测到软件的版本迭代，从而自动移除 python-pip 的安装
+:::info 环境冲突
+这里就可以看到，在已经通过 apt 安装 python-pip 的情况下，再通过 apt 安装 python3-pip，apt 就会检测到软件的版本迭代，从而自动移除 python-pip 的安装
+:::
 
 ### 安装 Volatility3
 
@@ -166,6 +170,6 @@ sudo pip3 install volatility3 pycryptodome -i https://pypi.tuna.tsinghua.edu.cn/
 
 ![volatility3 成功运行](img/image_20230701-110146.png)
 
-!!! info 额外配置
-
-    在 Vol 3 中，加入了输出信息级别的指定：-vv 参数，通过改变 v 的数量来指定输出的日志信息的级别（Info，Debug，Error 等等），通过加上-v 参数，可以发现目前还缺少 yara 相关依赖，但是由于 yara 配置的操作相对繁琐，并且不影响 Vol 3 的正常使用，故在此不做相关处理。  
+:::info 额外配置
+在 Vol 3 中，加入了输出信息级别的指定：-vv 参数，通过改变 v 的数量来指定输出的日志信息的级别（Info，Debug，Error 等等），通过加上-v 参数，可以发现目前还缺少 yara 相关依赖，但是由于 yara 配置的操作相对繁琐，并且不影响 Vol 3 的正常使用，故在此不做相关处理。  
+:::
