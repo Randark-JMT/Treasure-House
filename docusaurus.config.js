@@ -110,7 +110,6 @@ const config = {
             label: 'GitHub',
             position: 'right',
           },
-          
           /* {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/facebook/docusaurus',
@@ -123,41 +122,44 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: '社交联系',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/index',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                label: 'Github',
+                href: 'https://github.com/Randark-JMT',
               },
               {
                 label: 'Twitter',
-                href: 'https://twitter.com/docusaurus',
+                href: 'https://twitter.com/Randark_JMT',
+              },
+              {
+                label: 'Foxmail mail',
+                href: 'mailto:randark@foxmail.com',
+              },
+              {
+                label: 'Google mail',
+                href: 'mailto:randarkjmt@gmail.com',
               },
             ],
           },
           {
-            title: 'More',
+            title: '相关项目友链',
             items: [
               {
-                label: 'Blog',
-                to: '/blog',
+                label: 'Github - CTF-Archives',
+                href: 'https://github.com/CTF-Archives',
               },
               {
-                label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                label: 'GitHub - ctf-docker-template',
+                href: 'https://github.com/CTF-Archives/ctf-docker-template',
+              },
+              {
+                label: '探姬の星灵枢纽',
+                href: 'https://blog.probius.xyz/',
+              },
+              {
+                label: '雪殇 - snowywar.top',
+                href: 'http://www.snowywar.top',
               },
             ],
           },

@@ -1,15 +1,18 @@
 # Volatility 使用入门
 
-!!!info
-    本篇展示操作时所用的检材来自于 OtterCTF 2018 比赛的附件：[[OtterCTF 2018]What the password?](https://www.ctfer.vip/problem/2458)
-    所使用的 Volatility 2 环境是直接由源码运行，Volatility 3 环境由 pip 安装得来
+:::info
+本篇展示操作时所用的检材来自于 OtterCTF 2018 比赛的附件：[[OtterCTF 2018]What the password?](https://www.ctfer.vip/problem/2458)
+
+所使用的 Volatility 2 环境是直接由源码运行，Volatility 3 环境由 pip 安装得来
+:::
 
 ## Volatility 2 工作流
 
 简单来讲，就是需要先识别出是何种内存镜像，取自何种系统，然后指定符号表并加载模块进行数据分析
 
-!!!info
-    Volatility 在使用模块的时候（非 imageinfo 这类通用型），需要指定符号表（`--profile` 参数）才可以正常工作
+:::info
+Volatility 在使用模块的时候（非 imageinfo 这类通用型），需要指定符号表（`--profile` 参数）才可以正常工作
+:::
 
 ### 分析检材类型
 
@@ -36,8 +39,9 @@ INFO    : volatility.debug    : Determining profile based on KDBG search...
 
 这里就可以看到，Volatility 成功识别出了目标设备的内存数据类型（提取自 Windows 系统），并且给出了系统版本的建议：`Win7SP1x64`
 
-!!!info
-    对于非 WIndows 系统的设备提取出来的内存镜像，Volatility 无法正确识别出设备的内存情况，这个时候需要使用 strings+grep 直接对内存镜像中的数据进行筛选，通过关键字判断内存提取自何种设备
+:::info
+对于非 WIndows 系统的设备提取出来的内存镜像，Volatility 无法正确识别出设备的内存情况，这个时候需要使用 strings+grep 直接对内存镜像中的数据进行筛选，通过关键字判断内存提取自何种设备
+:::
 
 ### 查看进程列表
 
@@ -86,10 +90,13 @@ Offset(P)            #Ptr   #Hnd Access Name
 ......
 ```
 
-!!!tip
-    filescan 所输出的数据量是十分庞大的，所以想要增加效率的话，可以使用 grep+关键词来对数据进行筛选。关键词可以使用例如 Desktop，桌面（中文用户的桌面路径），secret，hint，flag 等等。
-    同时需要注意的是，使用 grep 对结果进行筛选的时候，关键词是有大小写敏感的
-    filescan 输出的结果中，传统的盘符（如 C 盘，D 盘）并不能正确显示，取而代之的则是如 `Device\HarddiskVolume1\` 这类的表示方法
+:::tip
+filescan 所输出的数据量是十分庞大的，所以想要增加效率的话，可以使用 grep+关键词来对数据进行筛选。关键词可以使用例如 Desktop，桌面（中文用户的桌面路径），secret，hint，flag 等等。
+
+同时需要注意的是，使用 grep 对结果进行筛选的时候，关键词是有大小写敏感的
+
+filescan 输出的结果中，传统的盘符（如 C 盘，D 盘）并不能正确显示，取而代之的则是如 `Device\HarddiskVolume1\` 这类的表示方法
+:::
 
 使用 grep+关键词的效果如下：
 
@@ -196,10 +203,12 @@ Process(V)         ImageBase          Name                 Result
 
 ## Volatility 3 工作流
 
-!!!info
+:::info
 
-    Volatility 3 改进了模块的工作方式，在相较与 Volatility 2 大大增加了分析速度的同时，也支持自动识别内存镜像的系统版本的特性，也就意味着再也不需要手动指定符号表了
-    虽然 Volatility 3 支持自动选择符号表来进行分析工作，但是对于系统种类（Windows，Mac OS，Linux）还是需要自行识别并指定。
+Volatility 3 改进了模块的工作方式，在相较与 Volatility 2 大大增加了分析速度的同时，也支持自动识别内存镜像的系统版本的特性，也就意味着再也不需要手动指定符号表了
+
+虽然 Volatility 3 支持自动选择符号表来进行分析工作，但是对于系统种类（Windows，Mac OS，Linux）还是需要自行识别并指定。
+:::
 
 ### 识别系统信息
 
@@ -236,11 +245,11 @@ PE Machine      34404
 PE TimeDateStamp        Sat Nov 20 09:30:02 2010
 ```
 
-!!!abstract
+:::tip
+以下的操作同 Volatility 2
+:::
 
-    以下的操作同 Volatility 2
-
-### 查看进程列表
+### Volatility 3 查看进程列表
 
 同样使用的是`pslist`模块，只不过不需要指定系统信息（符号表）
 
@@ -268,7 +277,7 @@ PID     PPID    ImageFileName   Offset(V)       Threads Handles SessionId       
 ......
 ```
 
-### 查看内存中加载了哪些文件
+### Volatility 3 查看内存中加载了哪些文件
 
 ```shell
 randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.filescan
@@ -286,7 +295,7 @@ Offset  Name    Size
 0x7d414dc0      \Windows\System32\en-US\setupapi.dll.mui        216
 ```
 
-### 根据 filescan 的结果提取内存中的文件
+### Volatility 3 根据 filescan 的结果提取内存中的文件
 
 ```shell
 randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.filescan | grep READ_IT
@@ -305,8 +314,16 @@ read program for more information.
 
 ## Volatility 2 Windows 相关模块
 
+TODO Volatility 2 Windows 相关模块
+
 ## Volatility 3 Windows 相关模块
+
+TODO Volatility 3 Windows 相关模块
 
 ## Volatility 2 Linux 相关模块
 
+TODO Volatility 2 Linux 相关模块
+
 ## Volatility 3 Linux 相关模块
+
+TODO Volatility 3 Linux 相关模块

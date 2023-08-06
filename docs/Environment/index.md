@@ -5,3 +5,5 @@ sidebar_class_name: green
 ---
 
 # 环境配置
+
+> ***Environment for live and dead***
