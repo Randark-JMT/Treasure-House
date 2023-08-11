@@ -1,4 +1,10 @@
-# 如何安装 Volatility
+---
+sidebar_position: 0
+sidebar_label: Volatility 如何安装
+sidebar_class_name: green
+---
+
+# Volatility 如何安装
 
 :::info 基础环境
 这里用作演示的系统为`Ubuntu-22.04-desktop-amd64` ，安装参数为选择了最小安装。其它系统也可以，但是还是建议新版本 Ubuntu，毕竟出了问题修起来也容易

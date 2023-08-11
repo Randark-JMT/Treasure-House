@@ -1,3 +1,9 @@
+---
+sidebar_position: 1
+sidebar_label: Volatility 使用入门
+sidebar_class_name: green
+---
+
 # Volatility 使用入门
 
 :::info
@@ -50,19 +56,19 @@ INFO    : volatility.debug    : Determining profile based on KDBG search...
 ```shell
 randark@randark-virtual-machine:~$ python2 ./volatility2/vol.py -f OtterCTF.vmem --profile=Win7SP1x64 pslist
 Volatility Foundation Volatility Framework 2.6.1
-Offset(V)          Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit                          
+Offset(V)          Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit
 ------------------ -------------------- ------ ------ ------ -------- ------ ------ ------------------------------ ------------------------------
-0xfffffa8018d44740 System                    4      0     95      411 ------      0 2018-08-04 19:26:03 UTC+0000                                 
-0xfffffa801947e4d0 smss.exe                260      4      2       30 ------      0 2018-08-04 19:26:03 UTC+0000                                 
-0xfffffa801a0c8380 csrss.exe               348    336      9      563      0      0 2018-08-04 19:26:10 UTC+0000                                 
-0xfffffa80198d3b30 csrss.exe               388    380     11      460      1      0 2018-08-04 19:26:11 UTC+0000                                 
-0xfffffa801a2ed060 wininit.exe             396    336      3       78      0      0 2018-08-04 19:26:11 UTC+0000                                 
-0xfffffa801aaf4060 winlogon.exe            432    380      3      113      1      0 2018-08-04 19:26:11 UTC+0000                                 
-0xfffffa801ab377c0 services.exe            492    396     11      242      0      0 2018-08-04 19:26:12 UTC+0000                                 
-0xfffffa801ab3f060 lsass.exe               500    396      7      610      0      0 2018-08-04 19:26:12 UTC+0000                                 
-0xfffffa801ab461a0 lsm.exe                 508    396     10      148      0      0 2018-08-04 19:26:12 UTC+0000                                 
-0xfffffa8018e3c890 svchost.exe             604    492     11      376      0      0 2018-08-04 19:26:16 UTC+0000                                 
-0xfffffa801abbdb30 vmacthlp.exe            668    492      3       56      0      0 2018-08-04 19:26:16 UTC+0000                                 
+0xfffffa8018d44740 System                    4      0     95      411 ------      0 2018-08-04 19:26:03 UTC+0000
+0xfffffa801947e4d0 smss.exe                260      4      2       30 ------      0 2018-08-04 19:26:03 UTC+0000
+0xfffffa801a0c8380 csrss.exe               348    336      9      563      0      0 2018-08-04 19:26:10 UTC+0000
+0xfffffa80198d3b30 csrss.exe               388    380     11      460      1      0 2018-08-04 19:26:11 UTC+0000
+0xfffffa801a2ed060 wininit.exe             396    336      3       78      0      0 2018-08-04 19:26:11 UTC+0000
+0xfffffa801aaf4060 winlogon.exe            432    380      3      113      1      0 2018-08-04 19:26:11 UTC+0000
+0xfffffa801ab377c0 services.exe            492    396     11      242      0      0 2018-08-04 19:26:12 UTC+0000
+0xfffffa801ab3f060 lsass.exe               500    396      7      610      0      0 2018-08-04 19:26:12 UTC+0000
+0xfffffa801ab461a0 lsm.exe                 508    396     10      148      0      0 2018-08-04 19:26:12 UTC+0000
+0xfffffa8018e3c890 svchost.exe             604    492     11      376      0      0 2018-08-04 19:26:16 UTC+0000
+0xfffffa801abbdb30 vmacthlp.exe            668    492      3       56      0      0 2018-08-04 19:26:16 UTC+0000
 0xfffffa801abebb30 svchost.exe             712    492      8      301      0      0 2018-08-04 19:26:17 UTC+0000
 ......
 ```
@@ -91,14 +97,14 @@ Offset(P)            #Ptr   #Hnd Access Name
 ```
 
 :::tip
-filescan 所输出的数据量是十分庞大的，所以想要增加效率的话，可以使用 grep+关键词来对数据进行筛选。关键词可以使用例如 Desktop，桌面（中文用户的桌面路径），secret，hint，flag 等等。
+filescan 所输出的数据量是十分庞大的，所以想要增加效率的话，可以使用 grep + 关键词来对数据进行筛选。关键词可以使用例如 Desktop，桌面（中文用户的桌面路径），secret，hint，flag 等等。
 
 同时需要注意的是，使用 grep 对结果进行筛选的时候，关键词是有大小写敏感的
 
 filescan 输出的结果中，传统的盘符（如 C 盘，D 盘）并不能正确显示，取而代之的则是如 `Device\HarddiskVolume1\` 这类的表示方法
 :::
 
-使用 grep+关键词的效果如下：
+使用 grep + 关键词的效果如下：
 
 ```shell
 randark@randark-virtual-machine:~$ python2 ./volatility2/vol.py -f OtterCTF.vmem --profile=Win7SP1x64 filescan | grep Desktop
@@ -136,7 +142,7 @@ DataSectionObject 0x7d660500   None   \Device\HarddiskVolume1\Users\Rick\Desktop
 那么就可以浏览目标文件的数据了：
 
 ```shell
-randark@randark-virtual-machine:~$ cat file.None.0xfffffa801b2def10.dat 
+randark@randark-virtual-machine:~$ cat file.None.0xfffffa801b2def10.dat
 Your files have been encrypted.
 Read the Program for more information
 read program for more information.
@@ -156,15 +162,15 @@ read program for more information.
 randark@randark-virtual-machine:~$ python2 ./volatility2/vol.py -f OtterCTF.vmem --profile=Win7SP1x64 memdump -p 3820 -D ./
 Volatility Foundation Volatility Framework 2.6.1
 ************************************************************************
-Writing Rick And Morty [  3820] to 3820.dmp
+Writing Rick And Morty [3820] to 3820.dmp
 ```
 
 输出的文件名格式为：`<pid of process>.dmp`
 
-然后就可以利用`strings`对提取出来的数据进行分析：
+然后就可以利用 `strings` 对提取出来的数据进行分析：
 
 ```shell
-randark@randark-virtual-machine:~$ strings 3820.dmp 
+randark@randark-virtual-machine:~$ strings 3820.dmp
 vn*u
 =Atw
 Temp
@@ -217,7 +223,7 @@ Volatility 3 改进了模块的工作方式，在相较与 Volatility 2 大大�
 ```shell
 randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.info
 Volatility 3 Framework 2.0.1
-Progress:  100.00               PDB scanning finished                        
+Progress:  100.00               PDB scanning finished
 Variable        Value
 
 Kernel Base     0xf80002a52000
@@ -251,12 +257,12 @@ PE TimeDateStamp        Sat Nov 20 09:30:02 2010
 
 ### Volatility 3 查看进程列表
 
-同样使用的是`pslist`模块，只不过不需要指定系统信息（符号表）
+同样使用的是 `pslist` 模块，只不过不需要指定系统信息（符号表）
 
 ```shell
 randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.pslist
 Volatility 3 Framework 2.0.1
-Progress:  100.00               PDB scanning finished                        
+Progress:  100.00               PDB scanning finished
 PID     PPID    ImageFileName   Offset(V)       Threads Handles SessionId       Wow64   CreateTime      ExitTime        File output
 
 4       0       System  0xfa8018d44740  95      411     N/A     False   2018-08-04 19:26:03.000000      N/A     Disabled
@@ -282,7 +288,7 @@ PID     PPID    ImageFileName   Offset(V)       Threads Handles SessionId       
 ```shell
 randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.filescan
 Volatility 3 Framework 2.0.1
-Progress:  100.00               PDB scanning finished                        
+Progress:  100.00               PDB scanning finished
 Offset  Name    Size
 
 0x5def290       \$Directory     216
@@ -302,11 +308,11 @@ randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.filescan | grep 
 0x7d660500 100.0\Users\Rick\Desktop\READ_IT.txt 216
 randark@randark-virtual-machine:~$ vol -f OtterCTF.vmem windows.dumpfiles --physaddr 0x7d660500
 Volatility 3 Framework 2.0.1
-Progress:  100.00               PDB scanning finished                        
+Progress:  100.00               PDB scanning finished
 Cache   FileObject      FileName        Result
 
 DataSectionObject       0x7d660500      READ_IT.txt     file.0x7d660500.0xfa801b2def10.DataSectionObject.READ_IT.txt.dat
-randark@randark-virtual-machine:~$ cat file.0x7d660500.0xfa801b2def10.DataSectionObject.READ_IT.txt.dat 
+randark@randark-virtual-machine:~$ cat file.0x7d660500.0xfa801b2def10.DataSectionObject.READ_IT.txt.dat
 Your files have been encrypted.
 Read the Program for more information
 read program for more information.

@@ -1,3 +1,9 @@
+---
+sidebar_position: 2
+sidebar_label: Volatility 插件指南
+sidebar_class_name: green
+---
+
 # Volatility 插件指南
 
 ## 在 Volatility 2 中使用插件
@@ -5,7 +11,7 @@
 对于`Volatility 2`中加载插件，有两种方式：一种是直接将插件文件放入`Volatility`的插件目录；另外一种是在启动`Volatility`的时候手动指定插件目录。第一种虽然是一劳永逸的，但是由于第一种方案会导致`Volatility`在每次启动的时候，都会加载一次所有的插件，会增加启动用时，并且部分情况下还会导致不同的插件之间发生冲突；而第二种只需要将插件整理在一个文件夹内，需要的时候再加载即可。
 
 :::info
-本文展示所用的环境为 [如何安装 Volatility](./如何安装 Volatility.md) 所搭建的环境，若使用其他的环境，则需要自行判断环境的异同点（理论上若是正确安装，则是不会有差异的）
+本文展示所用的环境为 [如何安装 Volatility](./Volatility-installation) 所搭建的环境，若使用其他的环境，则需要自行判断环境的异同点（理论上若是正确安装，则是不会有差异的）
 :::
 
 :::info
