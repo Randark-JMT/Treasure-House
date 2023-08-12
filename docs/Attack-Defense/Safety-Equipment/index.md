@@ -2,9 +2,9 @@
 
 ## 默安科技
 
-### [幻阵——高级威胁狩猎与溯源系统](https://www.moresec.cn/product/magic-shield)
+### [幻阵 - 高级威胁狩猎与溯源系统](https://www.moresec.cn/product/magic-shield)
 
-### [刃甲——网络攻击干扰压制系统](https://www.moresec.cn/product/ren-jia)
+### [刃甲 - 网络攻击干扰压制系统](https://www.moresec.cn/product/ren-jia)
 
 ## 国御科技
 

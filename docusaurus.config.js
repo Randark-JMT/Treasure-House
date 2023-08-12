@@ -188,7 +188,12 @@ const config = {
                     dark: 'rgb(50, 50, 50)'
                 }
             }
-        }
+        },
+        docs: {
+            sidebar: {
+                autoCollapseCategories: true,
+            },
+        },
     },
     themes: [
         [
