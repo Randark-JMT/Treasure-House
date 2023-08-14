@@ -508,3 +508,95 @@ for zip_file_name in zip_list:
 
 可以看到压缩包中全是炸弹：
 
+![zip bomb files 1](img/image_20230811-231159.png)
+
+这个时候如果用`binwalk`进行分析，也是会触发压缩包炸弹，于是选择直接用010 Editor进行数据搜索：
+
+![zip bomb files 1 format](img/image_20230812-231226.png)
+
+可以看到存在附加数据，手动对HEX数据进行分离，即可打开附加的压缩包：
+
+![zip bomb files 1 extra](img/image_20230812-231251.png)
+
+![zip bomb files 1 extra file](img/image_20230813-231309.png)
+
+这时候即可放心解压，得到以下数据：
+
+![zip bomb files 1 unzip data](img/image_20230813-231332.png)
+
+正则匹配，即可出来flag：
+
+![zip bomb files 1 flag](img/image_20230813-231348.png)
+
+##### [DASCTF 九月赛-ZipBomb](https://buuoj.cn/match/matches/36/challenges#ZipBomb)
+
+作为第一层压缩包，附件还是可以正常打开的：
+
+![zip bomb files 2 files](img/image_20230814-231409.png)
+
+面对大量的压缩包炸弹，只能使用脚本分析文件特征：
+
+```python
+import os.path
+import zipfile
+
+dir_path = 'C:\\Users\\Snowywar\\Desktop\\zipBomb'
+files = os.listdir(dir_path)
+newfiles = files[::-1]
+print(newfiles)
+setee = []
+for file in newfiles:  # 遍历文件夹
+    position = dir_path + '\\' + file  # 构造绝对路径，"\\"，其中一个'\'为转义符
+    print(position)
+    z = zipfile.ZipFile(position, 'r')
+    for filename in z.namelist():
+        bytes = z.read(filename)
+        if b'Zmxh' in bytes or b'flag' in bytes:
+            print(filename)
+```
+
+在这里，`Zmxh`是flag的Base64编码后的结果，针对flagBase64编码后的数据做特征识别，而flag则是直接识别flag。运行后即可找到flag存在于哪个压缩包和压缩包中的哪个文件。打开文件：
+
+![zip bomb files 2 flag base64](img/image_20230814-231445.png)
+
+Base64解码，即可得到flag：
+
+```python
+import base64
+
+print(base64.b64decode(b"ZmxhZ3tGIW5EX0ZsNGdfMW5fMklQXzEzT01CfQ==").decode())
+
+>>> flag{F!nD_Fl4g_1n_2IP_13OMB}
+```
+
+### 扩展型ZIP明文攻击
+
+> 这一块详情请见：[ZIP已知明文攻击深入利用](https://blog.csdn.net/q851579181q/article/details/109767425)
+>
+> 这种攻击太暴力了，怀疑实战中成功的概率太小了
+
+此攻击方法并不需要知道压缩文件中完整的明文，只需在已知加密压缩包中的少部分明文字节时即可进行攻击破解。而各类文件都有其自身固定的文件格式，结合这类格式，极大扩展了ZIP明文攻击的攻击面。
+
+具体要求如下：
+
+- 至少已知明文的12个字节及偏移，其中至少8字节需要连续。
+- 明文文件需要被相同的压缩算法标准压缩（也可理解为被相同压缩工具压缩）
+- 明文对应的文件加密方式为`ZipCrypto Store`
+
+可以说此方法大大提高了Zip明文攻击的适用范围，同时也是一种**全新的非预期解的实现方式**
+
+#### 涉及到的工具
+
+[**bkcrack：**](https://github.com/kimci86/bkcrack)
+
+> **bkcrack常用参数：**
+>
+> - -c 提取的密文部分
+> - -p 提取的明文部分
+> - -x 压缩包内目标文件的偏移地址  部分已知明文值
+> - -C 加密压缩包
+> - -o offset  -p参数指定的明文在压缩包内目标文件的偏移量
+
+基本可以说，只要满足了已知文件头和文件名，以及内部的少量数据，就可以以此为数据进行明文攻击
+
+~~仅适用于小的Zip文件~~
