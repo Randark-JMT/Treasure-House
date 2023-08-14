@@ -196,6 +196,7 @@ const config = {
         },
     },
     themes: [
+        '@docusaurus/theme-mermaid',
         [
             require.resolve("@easyops-cn/docusaurus-search-local"),
             ({
@@ -206,6 +207,9 @@ const config = {
     plugins: [
         'docusaurus-plugin-image-zoom'
     ],
+    markdown: {
+        mermaid: true,
+    },
 };
 
 module.exports = config;
