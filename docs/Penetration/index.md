@@ -119,13 +119,7 @@ WebShell 上传
 - LDAP 注入
 - XPATH 注入
 - JNDI 注入
-反序列化
-- Python 反序列化
-- JAVA 反序列化
-- .Net 反序列化
-- Ruby 反序列化
-- PHP 反序列化
-- JavaScript 反序列化
+
 信息泄露
 - 系统信息泄露
 - Web 组件信息泄露
@@ -135,30 +129,6 @@ WebShell 上传
 - 凭据泄露
 - Web 目录泄露
 请求伪造
-
-## 账号暴力破解
-
-口令暴力破解
-MYSQL 账号暴力破解
-RDP 账号暴力破解
-SSH 账号暴力破解
-SMTP 账号暴力破解
-FTP 账号暴力破解
-SMB 账号暴力破解
-IMAP 账号暴力破解
-POP3 账号暴力破解
-LDAP 账号暴力破解
-Kerberos 账号暴力破解
-Web 账号暴力破解
-Telnet 暴力破解
-SSLVPN 暴力破解
-
-## 远程执行
-
-WMI 命令执行
-DCOM 命令执行
-DRS 命令执行
-WinRM 命令执行
 
 ## 远程创建任务
 
