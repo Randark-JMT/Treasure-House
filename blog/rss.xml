@@ -4,10 +4,19 @@
         <title>Randark_JMT Blog</title>
         <link>http://treasure-house.randark.site/blog</link>
         <description>Randark_JMT Blog</description>
-        <lastBuildDate>Thu, 26 Aug 2021 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 18 Aug 2023 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>zh-Hans</language>
+        <item>
+            <title><![CDATA[测试]]></title>
+            <link>http://treasure-house.randark.site/blog/self-blog-post</link>
+            <guid>http://treasure-house.randark.site/blog/self-blog-post</guid>
+            <pubDate>Fri, 18 Aug 2023 00:00:00 GMT</pubDate>
+            <description><![CDATA[仅为一个测试]]></description>
+            <content:encoded><![CDATA[<h2 class="anchor anchorWithStickyNavbar_LWe7" id="仅为一个测试">仅为一个测试<a href="#仅为一个测试" class="hash-link" aria-label="仅为一个测试的直接链接" title="仅为一个测试的直接链接">​</a></h2><p>测试</p>]]></content:encoded>
+            <category>docusaurus</category>
+        </item>
         <item>
             <title><![CDATA[Welcome]]></title>
             <link>http://treasure-house.randark.site/blog/welcome</link>
