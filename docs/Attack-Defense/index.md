@@ -10,8 +10,8 @@ sidebar_class_name: green
 
 ## 名词解释
 
-- IOC - Indicators of Compromise 威胁情报
-- TI - Threat Intelligence
+- IOC - Indicators of Compromise 失陷检测情报
+- TI - Threat Intelligence 威胁情报
 
 ## 研究判断
 
