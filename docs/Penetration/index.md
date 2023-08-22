@@ -98,12 +98,15 @@ SNMP 弱口令
 
 文件包含
 WebShell 上传
+
 - 文件链接创建 WebShell
 - 文件写入创建 WebShell
 - 其他 WebShell 上传
+
 目录遍历
 网页挂马
 代码注入
+
 - SQL 注入
 - XSS 攻击
 - 系统命令注入
@@ -121,6 +124,7 @@ WebShell 上传
 - JNDI 注入
 
 信息泄露
+
 - 系统信息泄露
 - Web 组件信息泄露
 - 源代码泄露
@@ -152,7 +156,15 @@ Dos 攻击
 ## 渗透框架
 
 Empire
+
 CobaltStrike
+
 Metasploit
+
 Burpsuite
+
 SQLMap
+
+manjusaka
+
+havoc
