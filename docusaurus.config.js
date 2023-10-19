@@ -180,7 +180,7 @@ const config = {
             theme: lightCodeTheme,
             darkTheme: darkCodeTheme,
         },
-        zoom: {
+        /* zoom: {
             selector: '.markdown :not(em) > img',
             config: {
                 background: {
@@ -188,6 +188,19 @@ const config = {
                     dark: 'rgb(50, 50, 50)'
                 }
             }
+        }, */
+        imageZoom: {
+            // CSS selector to apply the plugin to, defaults to '.markdown img'
+            selector: '.markdown img',
+            // Optional medium-zoom options
+            // see: https://www.npmjs.com/package/medium-zoom#options
+            options: {
+                margin: 60,
+                // background: '#BADA55',
+                scrollOffset: 0,
+                // container: '#zoom-container',
+                // template: '#zoom-template',
+            },
         },
         docs: {
             sidebar: {
@@ -205,7 +218,8 @@ const config = {
         ],
     ],
     plugins: [
-        'docusaurus-plugin-image-zoom'
+        // 'docusaurus-plugin-image-zoom'
+        'plugin-image-zoom'
     ],
     markdown: {
         mermaid: true,
