@@ -13,7 +13,7 @@ Windows 平台可以直接使用现成的一些工具一键获取内存镜像 ( 
 :::
 
 :::info "来个跳转"
-[如何制作内存镜像](../Memory-Forensic/Make-Image.md)
+[如何制作内存镜像](./Make-Image/index.md)
 :::
 
 ## 如何解析内存数据
@@ -29,5 +29,5 @@ Windows 平台可以直接使用现成的一些工具一键获取内存镜像 ( 
 当前，`Volatility` 已经开发到了 `Volatility 3`，但是第三代仍然在开发阶段，其功能相较于第二代还不完善，但是第三代对 `Windows 10` 以上的 `Windows` 系统所导出的内存数据提供了更完善的支持，故建议进行内存取证工作的时候，两代 `Volatility` 都备着 ( 反正只是一个工具，相较于检材动辄大几 G 而言，完全不算大 ) 。
 
 :::info "来个跳转"
-[Volatility 指南](./Volatility-Guide/index.md)
+[Volatility 指南](./Volatility/index.md)
 :::
