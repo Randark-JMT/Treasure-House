@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunktreasure_house=self.webpackChunktreasure_house||[]).push([[914],{8059:e=>{e.exports=JSON.parse('{"label":"Memory-Forensic","permalink":"/blog/tags/memory-forensic","allTagsPath":"/blog/tags","count":2}')}}]);
