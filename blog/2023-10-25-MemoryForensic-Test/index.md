@@ -2,7 +2,7 @@
 slug: 2023-10-25-MemoryForensic-Test
 title: 内存取证实验 - 镜像 + 配置文件
 authors: Randark
-tags: []
+tags: ["Memory-Forensic"]
 ---
 
 新建虚拟机，使用 `ubuntu-22.04.2-desktop-amd64.iso` 作为安装镜像，正常完成安装，选择最小化安装，并且安装过程中不进行自动更新
@@ -235,12 +235,12 @@ KeyError: 'DW_AT_data_member_location'
 
 ```shell
 randark@memory-forensic:~/volatility2/volatility$ ls -lh | grep dwarf
--rw-rw-r-- 1 randark randark  15K 10月 24 23:54 dwarf.py
+-rw-rw-r-- 1 randark randark  15K 10 月 24 23:54 dwarf.py
 randark@memory-forensic:~/volatility2/volatility$ mv dwarf.py dwarf.py.bak
 randark@memory-forensic:~/volatility2/volatility$ nano dwarf.py
 randark@memory-forensic:~/volatility2/volatility$ ls -lh | grep dwarf
--rw-rw-r-- 1 randark randark  16K 10月 26 00:48 dwarf.py
--rw-rw-r-- 1 randark randark  15K 10月 24 23:54 dwarf.py.bak
+-rw-rw-r-- 1 randark randark  16K 10 月 26 00:48 dwarf.py
+-rw-rw-r-- 1 randark randark  15K 10 月 24 23:54 dwarf.py.bak
 ```
 
 再次尝试分析：
@@ -293,9 +293,9 @@ Tried to open image as:
  ArmAddressSpace - EXCEPTION: 'state'
 ```
 
-很不幸，依然存在问题。根据问题细节，可以追踪到这个issue：[Update Linux DTB scanner to handle newer Linux kernel versions (>= 5.14-rc1) #852](https://github.com/volatilityfoundation/volatility/pull/852)
+很不幸，依然存在问题。根据问题细节，可以追踪到这个 issue：[Update Linux DTB scanner to handle newer Linux kernel versions (>= 5.14-rc1) #852](https://github.com/volatilityfoundation/volatility/pull/852)
 
-根据issue中前辈们给出的方案，将这两个PR做出的更改加入到本地的Volatility2源码中
+根据 issue 中前辈们给出的方案，将这两个 PR 做出的更改加入到本地的 Volatility2 源码中
 
 - [Update Linux DTB scanner to handle newer Linux kernel versions (>= 5.14-rc1) #852](https://github.com/volatilityfoundation/volatility/pull/852/commits/9ff9e9bb9103d63cbb278e991209aa11cffc61ce)
 
