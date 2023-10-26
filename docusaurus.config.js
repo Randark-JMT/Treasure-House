@@ -107,6 +107,11 @@ const config = {
                     label: 'CTF研究',
                 },
                 {
+                    href: '/blog',
+                    label: 'Blog',
+                    position: 'right',
+                },
+                {
                     href: 'https://randark.site/',
                     label: '主站',
                     position: 'right',
