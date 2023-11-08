@@ -102,6 +102,12 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
+                    sidebarId: 'ICS_Sidebar',
+                    position: 'left',
+                    label: '工业控制',
+                },
+                {
+                    type: 'docSidebar',
                     sidebarId: 'CTF_Sidebar',
                     position: 'left',
                     label: 'CTF研究',
@@ -184,6 +190,7 @@ const config = {
         prism: {
             theme: lightCodeTheme,
             darkTheme: darkCodeTheme,
+            additionalLanguages: ['powershell', 'php'],
         },
         /* zoom: {
             selector: '.markdown :not(em) > img',
