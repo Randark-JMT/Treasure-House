@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunktreasure_house=self.webpackChunktreasure_house||[]).push([[3383],{7600:e=>{e.exports=JSON.parse('{"permalink":"/blog/tags/memory-forensic","page":1,"postsPerPage":10,"totalPages":1,"totalCount":2,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);
