@@ -1,12 +1,11 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+import { themes as prismThemes } from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-    title: 'Randark_JMT',
+    title: 'Randark_JMT - 陈橘墨',
     tagline: 'Why So Serious',
     favicon: 'img/favicon.ico',
 
@@ -187,32 +186,13 @@ const config = {
             ],
             copyright: `Copyright © ${new Date().getFullYear()} Treasure-House By Randark-JMT, Built with Docusaurus.`,
         },
-        prism: {
-            theme: lightCodeTheme,
-            darkTheme: darkCodeTheme,
-            additionalLanguages: ['powershell', 'php'],
+        colorMode: {
+            defaultMode: 'light',
+            disableSwitch: false,
+            respectPrefersColorScheme: false,
         },
-        /* zoom: {
-            selector: '.markdown :not(em) > img',
-            config: {
-                background: {
-                    light: 'rgb(255, 255, 255)',
-                    dark: 'rgb(50, 50, 50)'
-                }
-            }
-        }, */
-        imageZoom: {
-            // CSS selector to apply the plugin to, defaults to '.markdown img'
-            selector: '.markdown img',
-            // Optional medium-zoom options
-            // see: https://www.npmjs.com/package/medium-zoom#options
-            options: {
-                margin: 60,
-                // background: '#BADA55',
-                scrollOffset: 0,
-                // container: '#zoom-container',
-                // template: '#zoom-template',
-            },
+        prism: {
+            additionalLanguages: ['powershell', 'php', 'ini', 'json'],
         },
         docs: {
             sidebar: {
@@ -220,19 +200,6 @@ const config = {
             },
         },
     },
-    themes: [
-        '@docusaurus/theme-mermaid',
-        [
-            require.resolve("@easyops-cn/docusaurus-search-local"),
-            ({
-                hashed: true,
-            }),
-        ],
-    ],
-    plugins: [
-        // 'docusaurus-plugin-image-zoom'
-        'plugin-image-zoom'
-    ],
     markdown: {
         mermaid: true,
     },

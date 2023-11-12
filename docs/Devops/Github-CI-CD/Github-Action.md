@@ -41,10 +41,7 @@
 
 ## 自动化构建 Docker 镜像
 
-<aside>
-💡 以自己 [CTF-Archives](https://github.com/orgs/CTF-Archives/repositories) 仓库的 docker 自动化编译推送的脚本为例
-
-</aside>
+以自己 [CTF-Archives](https://github.com/orgs/CTF-Archives/repositories) 仓库的 docker 自动化编译推送的脚本为例
 
 Github Action 配置文件如下
 
@@ -121,10 +118,12 @@ jobs:
 
 - Check out the repo
 - Log in to Docker Hub
-- Log into registry ${{env.REGISTRY_GITHUB}}
+- Log into registry `${{env.7*7}}`
 - Get repository name
 - Extract metadata (tags, labels) for Docker
 - Build and push Docker images
 - Docker Hub Description
 
 ## 自动处理项目数据，并推送到 Github Release
+
+test
