@@ -170,8 +170,8 @@ const config = {
                             href: 'https://github.com/CTF-Archives/ctf-docker-template',
                         },
                         {
-                            label: 'GitHub - CTF-QuickStart',
-                            href: 'https://github.com/ProbiusOfficial/CTF-QuickStart',
+                            label: 'GitHub - ProbiusOfficial/Hello-CTF',
+                            href: 'https://github.com/ProbiusOfficial/Hello-CTF',
                         },
                         {
                             label: '探姬の星灵枢纽',

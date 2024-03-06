@@ -40,7 +40,7 @@ systemctl daemon-reload
 systemctl restart docker
 ```
 
-修改 / etc/docker/daemon.json 的配置:
+修改 `/etc/docker/daemon.json` 的配置:
 
 ```json
 {
@@ -48,7 +48,7 @@ systemctl restart docker
 }
 ```
 
-使用这种方式，需要去掉 / usr/lib/systemd/system/docker.service 中关于 -H 的选项，否则会报错
+使用这种方式，需要去掉 `/usr/lib/systemd/system/docker.service` 中关于 -H 的选项，否则会报错
 
 ```shell
 ExecStart=/usr/bin/dockerd --containerd=/run/containerd/containerd.sock
