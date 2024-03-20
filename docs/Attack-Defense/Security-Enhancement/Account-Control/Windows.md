@@ -129,7 +129,7 @@ net user test /DELETE
 
 :::
 
-对于更高级的影子账户，相关原理可以参考：[渗透测试 / 权限维持 / Windows](/docs/Penetration/Privilege-Persistence/Windows)
+对于更高级的影子账户，相关原理可以参考：[渗透测试 / 权限维持 / Windows](/docs/Penetration/Privilege-Persistence/)
 
 由于注册表是 Windows 储存配置数据的核心，所以可以直接通过注册表数据来对系统所有的账户进行排查
 
