@@ -71,15 +71,9 @@ const config = {
             items: [
                 {
                     type: 'docSidebar',
-                    sidebarId: 'Environment_Sidebar',
+                    sidebarId: 'DevSecOps_Sidebar',
                     position: 'left',
-                    label: '环境配置',
-                },
-                {
-                    type: 'docSidebar',
-                    sidebarId: 'Devops_Sidebar',
-                    position: 'left',
-                    label: '开发部署',
+                    label: 'DevSecOps',
                 },
                 {
                     type: 'docSidebar',
@@ -170,7 +164,7 @@ const config = {
                             href: 'https://github.com/CTF-Archives/ctf-docker-template',
                         },
                         {
-                            label: 'GitHub - ProbiusOfficial/Hello-CTF',
+                            label: 'GitHub - Hello-CTF',
                             href: 'https://github.com/ProbiusOfficial/Hello-CTF',
                         },
                         {

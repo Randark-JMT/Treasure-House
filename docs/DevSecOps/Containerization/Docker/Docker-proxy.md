@@ -65,10 +65,10 @@ Docker 守护进程的配置，可以直接通过 Docker 的服务配置文件�
 
 为了给 Docker Daemon 配置网络代理，可以在 `/etc/systemd/system/docker.service.d` 目录中添加文件 `http-proxy.conf`，并在其中写入：
 
-```conf
+```conf title="For example"
 [Service]
-Environment="HTTP_PROXY=http://proxy.server:port"
-Environment="HTTPS_PROXY=http://proxy.server:port"
+Environment="HTTP_PROXY=http://127.0.0.1:7890"
+Environment="HTTPS_PROXY=http://127.0.0.1:7890"
 Environment="NO_PROXY=localhost,127.0.0.1"
 ```
 
@@ -82,7 +82,9 @@ sudo systemctl restart docker
 即可为 Docker Daemon 配置网络代理，后续执行拉取镜像等操作，便会通过网络代理来进行
 
 :::tip
+
 对于目前 DockerHub 的服务在大陆不稳定的情况，配置阿里云等服务提供商的镜像加速服务反而杯水车薪，这个时候为 Docker Daemon 配置代理，反而是稳定性最好的解决方案
+
 :::
 
 ## Reference

@@ -1,10 +1,8 @@
 ---
 sidebar_position: 2
-sidebar_label: 管理面板 Portainer
-sidebar_class_name: green
 ---
 
-# 管理面板 Portainer
+# Portainer
 
 > 以下相关操作都基于 Portainer Community 社区版本，Docker 单机部署环境进行介绍与操作
 >
@@ -51,3 +49,7 @@ docker run -d -p 8000:8000 -p <HTTP port>:9000 -p <HTTPS port>:9443 --name porta
 ![Portainer local](img/image_20230809-140917.png)
 
 即可看到本节点的 Docker 运行信息，其中就包括了最常用的 Docker container 和 Docker Image，点击进去即可直接操作
+
+## Docker Swarm
+
+[Install Portainer CE with Docker Swarm on Linux | 2.19 | Portainer Documentation](https://docs.portainer.io/start/install/server/swarm/linux)
