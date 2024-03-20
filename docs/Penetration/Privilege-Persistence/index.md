@@ -1,7 +1,5 @@
 # 权限维持
 
-## [Windows 权限维持](./Windows/)
-
 ## Windows 权限维持
 
 `https://www.wangan.com/p/7fy7fgbd4d434cb3`
