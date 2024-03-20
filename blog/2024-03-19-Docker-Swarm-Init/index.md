@@ -65,7 +65,7 @@ Swarm initialized: current node (pq6gku0fv2rfad9tt9np2bvzy) is now a manager.
 
 To add a worker to this swarm, run the following command:
 
-    docker swarm join --token SWMTKN-1-2i38jri5twojygrsm3b0dvvreshdt6yy1g7nwa1ocf3c15isu4-da9ylfballkeghd04o1trcimh 192.168.200.134:2377
+    docker swarm join --token ****** 192.168.200.134:2377
 
 To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
 ```
@@ -75,13 +75,13 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 然后将三台子节点加入到 swarm
 
 ```shell
-root@docker-node-1 [~]# docker swarm join --token SWMTKN-1-2i38jri5twojygrsm3b0dvvreshdt6yy1g7nwa1ocf3c15isu4-da9ylfballkeghd04o1trcimh 192.168.200.134:2377
+root@docker-node-1 [~]# docker swarm join --token ****** 192.168.200.134:2377
 This node joined a swarm as a worker.
 
-root@docker-node-2 [~]# docker swarm join --token SWMTKN-1-2i38jri5twojygrsm3b0dvvreshdt6yy1g7nwa1ocf3c15isu4-da9ylfballkeghd04o1trcimh 192.168.200.134:2377
+root@docker-node-2 [~]# docker swarm join --token ****** 192.168.200.134:2377
 This node joined a swarm as a worker.
 
-root@docker-node-3 [~]# docker swarm join --token SWMTKN-1-2i38jri5twojygrsm3b0dvvreshdt6yy1g7nwa1ocf3c15isu4-da9ylfballkeghd04o1trcimh 192.168.200.134:2377
+root@docker-node-3 [~]# docker swarm join --token ****** 192.168.200.134:2377
 This node joined a swarm as a worker.
 ```
 
