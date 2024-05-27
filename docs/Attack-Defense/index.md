@@ -10,8 +10,11 @@ sidebar_class_name: green
 
 ## 名词解释
 
-- IOC - Indicators of Compromise 失陷检测情报
-- TI - Threat Intelligence 威胁情报
+| 缩写 |                    英文全称                    |       中文全称       |
+| :--: | :--------------------------------------------: | :------------------: |
+| IOC  |            Indicators of Compromise            |     失陷检测情报     |
+|  TI  |              Threat Intelligence               |       威胁情报       |
+| SOAR | Security Orchestration Automation and Response | 安全编排自动化与响应 |
 
 ## 研究判断
 
