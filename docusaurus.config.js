@@ -101,6 +101,12 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
+                    sidebarId: 'Certificate_Sidebar',
+                    position: 'left',
+                    label: '证书',
+                },
+                {
+                    type: 'docSidebar',
                     sidebarId: 'CTF_Sidebar',
                     position: 'left',
                     label: 'CTF研究',

@@ -1,4 +1,11 @@
+---
+sidebar_position: 2
+toc_max_heading_level: 4
+---
+
 # 深信服
+
+> 数据整理自 2023-09
 
 ## 网络安全
 
@@ -79,6 +86,8 @@ EDR，英文全称是 Endpoint Detection and Resopnse, 中文名称是 “终端
 ## 额外设备
 
 ### 潜伏威胁探针 - STA
+
+FIXME 文档失效
 
 相关资料：[深信服潜伏威胁探针 STA-100-B2100](https://www.sangfor.com.cn/document/0a0ec79bbd92484eb98e087d073f3c84)
 

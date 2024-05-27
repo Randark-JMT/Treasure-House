@@ -1,7 +1,6 @@
 ---
 sidebar_position: 0
 sidebar_label: 红蓝攻防
-sidebar_class_name: green
 ---
 
 # 红蓝攻防
