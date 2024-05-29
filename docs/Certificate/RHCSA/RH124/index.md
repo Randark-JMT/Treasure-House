@@ -536,7 +536,7 @@ $ journalctl --since today
 $ journalctl --since "2022-03-11 20:30:00" --until "2022-03-14 10:00:00"
 
 # 查看上一个小时的所有条目
-$ journalctl --since "-1 hourv"
+$ journalctl --since "-1 hour"
 
 # 查看日志信息的详细输出
 $ journalctl -o verbose
