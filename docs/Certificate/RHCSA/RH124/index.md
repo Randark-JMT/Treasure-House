@@ -50,9 +50,28 @@ sidebar_position: 1
 
 ### 访问命令行
 
+在命令行中，不同的 shell 提示符代表着不同的用户状态
+
+- `$` 代表普通用户的状态
+- `#` 代表超级用户的状态
+
+使用 `Ctrl`+`Alt`+`F1 - F6` 功能键组合，可以切换各个虚拟控制台（tty）
+
 ### 使用桌面访问命令行
 
+红帽企业 Linux 9 中，默认使用 `GNOME 40` 作为默认桌面环境
+
+可以使用 `Alt + F2` 快捷键，然后输入 `gnome-terminal` 来启动桌面环境下的终端
+
 ### 使用 Bash Shell 执行命令
+
+- `Ctrl + A`：跳到命令行的开头
+- `Ctrl + E`：跳到命令行的末尾
+- `Ctrl + U` 将光标处到命令行开头的内容清除
+- `Ctrl + K`：将光标处到命令行末尾的内容清除
+- `Ctrl + LeftArrow`：跳到命令行中前一字的末尾
+- `Ctrl + RightArrow`：跳到命令行中下一字的末尾
+- `Ctrl + R`：在历史记录列表中搜索某一模式的命令
 
 ### 总结
 
@@ -91,6 +110,8 @@ sidebar_position: 1
 > 实验：从命令行管理文件
 
 ### 描述 Linux 文件系统层次结构概念
+
+TODO 在这里补上后续的内容
 
 ### 通过名称指定文件
 
@@ -579,7 +600,7 @@ $ timedatectl set-ntp true/false
 
 在红帽企业 Linux 中，`timedatectl set-ntp` 命令可调整是否启用 `chronyd`NTP 服务
 
-`chronyd` 服务的配置文件位于 `/etc/chront.conf`
+`chronyd` 服务的配置文件位于 `/etc/chronyd.conf`
 
 ```shell
 # 验证本地系统是否使用 NTP 服务器进行自动时间调整
@@ -595,23 +616,664 @@ $ chronyc sources -v
 - `chronyd` 服务有助于将时间设置与时间源同步
 - 您可以根据服务器的位置更新其时区
 
-## 管理网络 P390
+## 管理网络
 
-> 配置红帽企业 Linux 服务器上的网络接口和设置
+> 目标：配置红帽企业 Linux 服务器上的网络接口和设置
+>
+> 培训目标：
+>
+> - 描述服务器关于网络寻址和路由的基本概念
+> - 使用命令行实用程序，测试并检查当前的网络配置
+> - 使用 `nmcli` 命令管理网络设置和设备
+> - 通过编辑配置文件修改网络配置
+> - 配置服务器的静态主机名及其名称解析，并测试其结果
+>
+> 章节：
+>
+> - 描述网络概念（及测验）
+> - 验证网络配置（及引导式练习）
+> - 从命令行配置网络（及引导式练习）
+> - 编辑网络配置文件（及引导式练习）
+> - 配置主机名和名称解析（及引导式练习）
+>
+> 实验：管理网络
+
+### 描述网络概念
+
+TCP/IP 网络模型是一组简化的四层通信协议
+
+- 应用：应用层，如 SSH 协议，HTTP（S）协议，FTP 协议，SMTP 协议等等
+- 传输：TCP 和 UDP 是传输层协议，TCP 是可靠连接导向型通信，UDP 属于无连接数据报协议。在 `/etc/services` 文件中可以查看常用和已注册的端口列表
+- 互联网：IPv4 和 IPv6 协议是互联网层协议，每个主机具有 IP 地址和前缀，用于确定网络地址
+- 链路：最常见的网络类型是有线以太网（802.3）和 WIFI（802.11）。每一个物理设备具有一个媒体访问控制（MAC）地址，也称为硬件地址。
+
+```shell
+# 查看本地网卡信息
+$ ip addr show
+$ ip a
+
+# 以简短形式列出网卡信息
+$ ip -br addr show
+
+# 列出指定网卡的信息（如 eth0）
+$ ip addr show eth0
+```
+
+### 验证网络配置
+
+```shell
+# 列出系统上可用的所有网络接口
+$ ip link show
+
+# 查看设备和地址信息（如 ens3）
+$ ip addr show ens3
+
+# 显示关于网络性能的统计信息
+$ ip -s link show
+
+# 查看路由表
+$ ip route
+
+# 查看 IPv6 的路由表
+$ ip -6 route
+```
+
+若要追踪网络流量经过哪些设备，可以使用 `traceroute` 和 `tracepath` 命令
+
+```shell
+# 追踪到 access.redhat.com 的网络流量经过哪些设备
+$ tracepath access.redhat.com
+$ traceroute access.redhat.com
+
+# 基于 TCP 追踪到 access.redhat.com 的网络流量经过哪些设备
+$ traceroute -T access.redhat.com
+
+# 基于 ICMP 追踪到 access.redhat.com 的网络流量经过哪些设备
+$ traceroute -I access.redhat.com
+```
+
+查询本地系统当前网络的套接字，可以使用 `netstat` 或者使用 `ss`
+
+```shell
+# 显示套接字统计信息
+$ ss -ta
+```
+
+### 从命令行配置网络
+
+在 Linux 中，可以使用 `nmcli` 对 NetworkManager 服务进行管理，NetworkManager 服务可以监控和管理系统的网络设置
+
+```shell
+# 显示所有网络设备的状态
+$ nmcli device status
+$ nmcli dev status
+
+# 显示所有连接的列表
+$ nmcli connection show
+$ nmcli con show
+
+# 显示所有活动的连接的列表
+$ nmcli connection show --active
+$ nmcli con show --active
+```
+
+可以手动添加一个网络连接
+
+```shell
+# 添加 eno2 网络接口的 ethernet 类型的 eno2 连接
+$ nmcli con add con-name eno2 type ethernet ifname eno2
+```
+
+可以添加一个静态 IPv4 的网络连接 eno3
+
+```shell
+# 静态 IPv4 网络设置的 eno3 网络接口的 ethernet 类型的 eno3 连接
+# IP 地址为 192.168.0.5
+# 网络前缀为 /24
+# 网络网关为 192.168.0.254
+$ nmcli con add con-name eno3 type ethernet ifname eno3 \
+    ipv4.method manual \
+    ipv4.address 192.168.0.5/24 \
+    ipv4.gateway 192.168.0.254
+```
+
+同时配置静态 IPv4 和静态 IPv6 的网络连接 eno4
+
+```shell
+# IPv6 地址 2001:db8:0:1::c000:207
+# IPv6 网络前缀 /64
+# IPv6 网关地址 2001:db8:0:1::1
+# IPv4 地址 192.0.2.7
+# IPv4 网络前缀 /24
+# IPv4 网关地址 192.0.2.1
+$ nmcli con add con-name eno4 type ethernet ifname eno4 \
+    ipv6.method manual \
+    ipv6.address 2001:db8:0:1::c000:207/64 \
+    ipv6.gateway 2001:db8:0:1::1 \
+    ipv4.method manual \
+    ipv4.address 192.0.2.7/24 \
+    ipv4.gateway 192.0.2.1
+```
+
+通过 `nmcli` 管理网络连接
+
+```shell
+# 激活网络连接
+$ nmcli connection up <connection name>
+
+# 断开网络设备的连接
+$ nmcli device disconnect <device name>
+```
+
+通过 `nmcli` 更新连接设置
+
+```shell
+# 更新 static-ens3 连接
+# IPv4 地址 192.0.2.2/24
+# IPv4 网关地址 192.0.2.254
+# 系统启动时自动启用
+$ nmcli con mod static-ens3 \
+    ipv4.address 192.0.2.2/24 \
+    ipv4.gateway 192.0.2.254 \
+    connection.autoconnect yes
+
+# 更新 static-ens3 连接
+# IPv6 地址 2001:db8:0:1::a00:1/64
+# IPv6 网关地址 2001:db8:0:1::1
+# 系统启动时自动启用
+$ nmcli con mod static-ens3 \
+    ipv6.address 2001:db8:0:1::a00:1/64 \
+    ipv6.gateway 2001:db8:0:1::1
+```
+
+一些设置可以拥有多个值，可以通过加号和减号对配置项列表进行编辑
+
+```shell
+# 更新 static-ens3 连接
+# IPv4 的 dns 服务器列表添加 2.2.2.2
+$ nmcli con mod static-ens3 +ipv4.dns 2.2.2.2
+```
+
+同时，也可以手动编辑 `cat /etc/NetworkManager/system-connections/` 目录下的配置文件来配置连接，并在编辑后使用 `nmcli con reload` 更新配置项
+
+`nmcli connection delete` 命令可以从系统中删除连接，断开设备连接，并删除连接的配置文件
+
+```shell
+# 删除 static-ens3 连接
+$ nmcli con del static-ens3
+```
+
+对 `NetworkManager` 服务部分配置项进行配置需要 `root` 权限，可以通过 `nmcli general permissions` 命令对权限进行查询
+
+### 编辑网络配置文件
+
+可以手动对 NetworkManager 服务的配置文件进行手动编辑，配置文件位于
+
+- `/etc/NetworkManager/system-connections/`
+- `/etc/sysconfig/network-scripts/` (old)
+
+对配置文件进行手动修改了之后，需要执行 `nmcli con reload` 进行重载
+
+### 配置主机名和名称解析
+
+执行 `hostname` 可以输出当前系统的主机名，使用 `hostnamectl` 对主机名等参数进行配置
+
+`/etc/hosts` 文件记录了静态名称解析记录，可以使用 `getent hosts <hostname>` 对静态名称解析记录进行查询，使用 `host <hostname>` 测试 DNS 服务器连接并执行 DNS 查询
+
+若要执行 dns 查询，可以使用 `host`、`dig` 和 `nslookup` 命令
+
+### 总结
+
+- TCP/IP 网络模型是一种简化的四层抽象集合，用于描述不同的协议如何进行互操作，以便计算机通过互联网将流量从一台计算机发送至另一计算机
+- IPv4 是当今互联网上使用的主要网络协议
+- IPv6 旨在最终取代 IPv4 网络协议
+- 默认情况下，红帽企业 Linux 以双栈模式运行，并行使用两种协议
+- 网络路由决定了将数据包发送到特定网络的正确网络接口
+- `NetworkManager` 守护进程监控和管理网络配置
+- `nmcli` 命令是一个用于通过 `NetworkManager` 守护进程来配置网络设置的命令行工具
+- 自虹膜企业 Linux 9 起，网络配置的默认位置是 `/etc/NetworkManager/system-connections` 目录
+- 系统的静态主机名储存在 `/etc/hostname` 文件中
+- `hostnamectl` 命令可以修改或查看系统的主机名和相关设置的状态
 
 ## 归档和传输文件
 
+> 目标：将文件归档，并从一个系统复制文件到另一系统
+>
+> 培训目标：
+>
+> - 使用 `tar` 将文件和目录归档到压缩文件中，以及提取现有 `tar` 存档的内容
+> - 通过 SSH，与远程系统安全地来回传输文件
+> - 高效、安全地将本地文件或目录内容与远程服务器副本同步
+>
+> 章节：
+>
+> - 管理压缩的 tar 存档（及引导式练习）
+> - 在系统之间安全地传输文件（及引导式练习）
+> - 在系统之间安全地同步文件（及引导式练习）
+>
+> 实验：归档和传输文件
+
+### 管理压缩的 tar 存档
+
+`tar` 命令执行操作需要以下操作之一
+
+- `-c` or `--create` ：创建存档文件
+- `-t` or `--list` ：列出存档的内容
+- `-x` or `--extract` ：提取存档
+
+通常包括以下常用的选项
+
+- `-v` or `--verbose` ：显示操作期间存档或提取的文件
+- `-f` or `--file` ：要创建或打开的存档文件名
+- `-p` or `--preserve-permissions` ：提取时保留原始文件权限
+- `--xattrs` ：启用扩展属性支持
+- `--selinux` ：启用 SELinux 上下文支持
+
+以下选项可以用于选择算法
+
+- `-a` or `--auto-compress` ：使用存档的后缀决定压缩算法
+- `-z` or `--gzip` ：使用 gzip 算法
+- `-j` or `--bzip2` ：使用 bzip2 算法
+- `-J` or `--xz` ：使用 xz 压缩算法
+
+### 在系统之间安全地传输文件
+
+可以使用 OpenSSH 套件中的 sftp 命令进行文件传输
+
+```shell
+# 使用 sftp 连接到远程主机
+$ sftp username@remotehost
+
+# 查询本地当前工作目录
+sftp> lpwd
+
+# 查询远程当前工作目录
+sftp> pwd
+
+# 在远程主机上创建目录
+sftp> mkdir <folder name>
+
+# 将本地文件传输到远程的当前工作目录
+sftp> put <local file path>
+
+# 将远程文件传输到本地的当前工作目录
+sftp> get <remote file path>
+```
+
+在 `get` 和 `put` 命令中，可以使用 `-r` 参数来以递归的方式操作目录
+
+### 在系统之间安全地同步文件
+
+使用 `rsync` 可以在系统之间安全地复制并同步文件（差量化）
+
+### 总结
+
+- `tar` 命令可从一组文件和目录创建存档文件。它还能提取和列出存档文件中的文件
+- `tar` 命令提供一组压缩方式，用于缩小存档的大小
+- 除了提供安全远程 shell 外，`SSH` 服务也提供 `sftp` 命令，作为与运行 `SSH` 服务器的远程系统来回传输文件的安全方式
+- `rsync` 命令可安全高效地在两个目录之间同步文件夹，其中任一目录可以在远程系统上
+
 ## 安装和更新软件包
 
-> 从红帽和 DNF 软件包存储库下载、安装、更新和管理软件包
+> 目标：从红帽和 DNF 软件包存储库下载、安装、更新和管理软件包
+>
+> 培训目标：
+>
+> - 将系统注册到您的红帽账户，并使用红帽订阅管理为其分配软件更新和支持服务的权利
+> - 说明如何以 RPM 软件包形式提供软件，并调查 DNF 和 RPM 安装的系统软件包
+> 使用 `dnf` 命令查找、安装和更新软件包
+> - 启用和禁用红帽或第三方 DNF 储存库
+>
+> 章节：
+>
+> - 注册系统以获取红帽支持（及测验）
+> - 解释和调查 RPM 软件包（及引导式练习）
+> - 使用 DNF 安装和更新软件包（及引导式练习）
+> - 启用 DNF 软件储存库（及引导式练习）
+>
+> 实验：安装和更新软件包
+
+### 注册系统以获取红帽支持
+
+可以使用 GUI 进行系统注册，或者使用 CLI 程序进行注册
+
+```shell
+# 使用红帽客户门户凭据进行注册系统
+$ subscription-manager register --username <user name>
+
+# 查看当前账户的可用订阅
+$ subscription-manager list --available
+
+# 自动附加订阅
+$ subscription-manager attach --auto
+
+# 从可用列表的特定池中附加订阅
+$ subscription-manager attach --pool=<pool ID>
+
+# 查看已用订阅
+$ subscription-manager list --consumed
+
+# 取消注册系统
+$ subscription-manager unregister
+```
+
+授权证书可在本地系统上储存当前的授权信息，系统授权证书位于
+
+- `/etc/pki/product` ：已安装的红帽产品
+- `/etc/pki/consumer` ：注册的红帽账户
+- `/etc/pki/entitlement` ：系统附加有哪些订阅
+
+### 解释和调查 RPM 软件包
+
+`rpm` 实用程序是一款低级工具，可检索软件包文件和已安装软件包的内容的相关信息
+
+```shell
+# 列出所有已安装的软件包
+$ rpm -qa
+
+# 确定提供 <filename> 的软件包
+$ rpm -qf <filename>
+
+# 列出当前安装的软件包版本
+$ rpm -q
+
+# 获取软件包的详细信息
+$ rom -qi
+
+# 列出软件包安装的文件
+$ rpm -ql
+
+# 仅列出软件包安装的配置文件
+$ rpm -qc
+
+# 仅列出软件包安装的文档文件
+$ rpm -qd
+
+# 列出安装或删除软件包时执行的 shell 脚本
+$ rpm -q --scripts
+
+# 列出软件包的更改日志信息
+$ rpm -q --changelog
+
+# 列出本地软件包安装的文件
+$ rpm -qlp
+```
+
+通过 `rpm` 可以对本地的 rpm 包进行操作
+
+```shell
+# 安装在本地目录的 RPM 包
+$ rpm -ivh <rpm filepath>
+
+# 从 rpm 包中提取文件
+$ rpm2cpio <rpm filepath> | cpio -idv
+
+# 列出 rpm 包内的文件
+$ rpm2cpio <rpm filepath> | cpio -tv
+```
+
+### 使用 DNF 安装和更新软件包
+
+DNF（Dandified YUM）取代了 YUM，两者在功能上一致
+
+```shell
+# 显示已安装和可用的软件包
+$ dnf list "http*"
+
+# 使用关键词进行软件包检索
+$ dnf search all "web server"
+
+# 查看软件包相关的详细信息
+$ dnf info httpd
+
+# 查询与指定路径匹配的软件包
+$ dnf provides /var/www/html
+```
+
+可以使用 `dnf` 对软件包进行安装和删除
+
+```shell
+# 获取并安装软件包
+$ dnf install httpd
+
+# 获取并更新软件包
+$ dnf update <package name>
+
+# 为系统安装新的内核
+$ dnf update kernel
+
+# 列出所有已安装和可用的内核
+$ dnf list kernel
+
+# 删除安装的软件包
+$ dnf remove httpd
+```
+
+在 `dnf` 中存在有组的概念，即针对特定目的而一起安装的相关软件的集合
+
+```shell
+# 显示已安装和可用的组
+$ dnf group list
+
+# 显示已安装和可用的组（包括隐藏的组）
+$ dnf group list hidden
+
+# 显示与组相关的信息
+$ dnf group info "RPM Development Tools"
+
+# 安装一个组
+$ dnf group install "RPM Development Tools"
+```
+
+所有的安装和删除事物的日志都记录在 `/var/log/dnf.rpm.log` 中
+
+`dnf history` 命令可以显示安装和删除事物的摘要，使用 `dnf history undo 6` 可以撤销事物
+
+`dnf` 支持应用流的模块化功能
+
+```shell
+# 列出可用的模块
+$ dnf module list
+
+# 列出特定模块的模块流
+$ dnf module list module-name
+
+# 显示模块的详细信息
+$ dnf module info module-name
+
+# 显示哪个模块提供特定的软件包
+$ dnf module provides package
+```
+
+### 启用 DNF 软件储存库
+
+```shell
+# 列出所有可用的储存库及其状态
+$ dnf repolist all
+
+# 启用或禁用储存库
+$ dnf config-manager --enable rhel-9-server-debug-rpms
+$ dnf config-manager --disable rhel-9-server-debug-rpms
+
+# 添加储存库
+$ dnf config-manager --add-repo="https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/"
+```
+
+`dnf` 处理软件包时，基于 GPG 公钥对软件包进行校验，可以使用 `rpm --import` 导入 GPG 公钥
+
+### 总结
+
+- 红帽订阅管理提供用于向计算机授权产品订阅的工具，以便获取软件包的更新，并且跟踪系统所用支持合同和订阅的相关信息
+- 软件以 RPM 软件包的形式提供，因此可以轻松地在系统上安装、升级和卸载软件
+- `rpm` 命令可用于查询本地数据库，以提供有关已安装软件包的内容的信息并安装已下载的软件包文件
+- `dnf` 实用程序是一个强大的命令行工具，可用于安装、更新、删除和查询软件包
+- 红帽企业 Linux 使用应用流，通过提供单个储存库来承载应用软件包及其依赖项的多个版本
 
 ## 访问 Linux 文件系统
 
-> 访问、检查和使用 Linux 服务器附加存储上的现有文件系统
+> 目标：访问、检查和使用附加至 Linux 服务器的存储上的现有文件系统
 >
+> 培训目标：
+>
+> - 识别文件系统层次结构中的目录，以及储存该目录的设备
+> - 通过在文件系统层次结构中添加和删除文件系统，访问文件系统的内容
+> - 通过 `find` 和 `locate` 命令搜索已挂载文件系统上的文件
+>
+> 章节：
+>
+> - 识别文件系统和设备（及测验）
+> - 挂载和卸载文件系统（及引导式练习）
+> - 查找系统上的文件（及引导式练习）
+>
+> 实验：访问 Linux 文件系统
+
+### 识别文件系统和设备
+
+`/dev` 目录下储存 RHEL 自动为所有设备创建的块设备文件
+
+使用 `df` 列出系统上的文件系统和挂载点，可以添加 `-h` 参数，使 `df` 的输出单位转换为人类可读格式
+
+使用 `du` 列出某一特定目录树空间的详细信息，可以添加 `-h` 参数，使 `du` 的输出单位转换为人类可读格式
+
+### 挂载和卸载文件系统
+
+```shell
+# 列出指定块设备或所有可用设备的详细信息
+$ lsblk
+
+# 将 /dev/vda4 分区挂载到 /mnt/data 挂载点
+$ mount /dev/vda4 /mnt/data
+
+# 列出设备的完整路径、其 UUID 和挂载点
+$ lsblk -fp
+
+# 通过文件系统的 UUID 挂载文件系统
+$ mount UUID="<UUID>" /mnt/data
+
+# 使用挂载点卸载设备
+$ umount /mnt/data
+
+# 列出所有打开的文件，以及访问该文件系统的进程
+$ lsof /mnt/data
+```
+
+### 查找系统上的文件
+
+`locate` 的数据库会每日更新，也可以使用 `updatedb` 命令进行强制即可更新
+
+```shell
+# 查找用户可以读取并且名称或者路径中与 `passwd` 关键词匹配的文件
+$ locate passwd
+
+# 执行不区分大小写的搜索
+$ locate -i messages
+
+# 对搜索结果的结果数量进行限制
+$ locate -n 5 passwd
+```
+
+`find` 通过在文件系统层次结构中执行实时搜索来查找文件
+
+```shell
+# 搜索根目录的 sshd_config 文件
+$ find / -name sshd_config
+
+# 从根目录开始搜索以 .txt 扩展名结尾的文件
+$ find / -name '*.txt'
+
+# 搜索含有 pass 字符串的文件
+$ find / -name '*pass*'
+
+# 执行不区分大小写的搜索
+$ find / -iname '*messages*'
+
+# 搜索 developer 用户拥有的文件
+$ find -user developer
+
+# 搜索 developer 组拥有的文件
+$ find -group developer
+
+# 搜索 uid == 1000 的用户拥有的文件
+$ find -uid 1000
+
+# 搜索 gid == 1000 的组拥有的文件
+$ find -gid 1000
+
+# 搜索特定文件权限的文件
+$ find /home -perm 764
+$ find /home -perm u=rwx,g=rw,o=r
+
+# 基于文件权限进行搜索时，列出文件的信息
+$ find /home -perm 764 -ls
+```
+
+`find` 可以基于文件大小进行搜索
+
+```shell
+# 大小为 10 兆字节的文件
+$ find -size 10M
+
+# 大小超过 10 千兆字节的文件
+$ find -size +10G
+
+# 大小不到 10 千字节的文件
+$ find -size -10k
+```
+
+`find` 可以基于文件的修改时间进行搜索
+
+```shell
+# 120 分钟前更改过内容的所有文件
+$ find / -mmin 120
+
+# 200 分钟前更改过内容的所有文件
+$ find / -mmin +200
+
+# 过去 150 分钟内更改过内容的所有文件
+$ find / -mmin -150
+```
+
+`find` 也可以基于文件类型进行搜索
+
+```shell
+# 搜索 /etc 目录中的所有目录
+$ find /etc -type d
+
+# 搜索 / 目录中的所有软链接
+$ find / -type l
+
+# 搜索 /dev 目录中的所有块设备
+$ find /dev -type b
+
+# 搜索硬链接数超过一个的所有常规文件
+$ find / -type f -links +1
+```
+
+### 总结
+
+- 储存设备由块设备文件类型来表示
+- `df` 命令可报告所有已挂载的普通文件系统的总磁盘空间、已用磁盘空间和可用磁盘空间
+- `root` 用户可以使用 `mount` 命令手动挂载文件系统
+- 要成功卸载设备，所有进程都必须停止访问对应挂载点
+- 在使用图形环境时，可移动储存设备挂载到 `/run/media` 目录
+- `lsblk` 命令可列出块设备的详细信息，如大小和 UID
+- `find` 命令可以根据搜索条件，在本地文件系统中实时搜索文件
+
 ## 分析服务器和获取支持
 
-> 在基于 Web 的管理界面中调查和解决问题，并从红帽获取支持以帮助解决问题
+> 目标：在基于 Web 的管理界面中调查和解决问题，并从红帽获取支持以帮助解决问题
+>
+> 培训目标：
+>
+> - 激活 Web 控制台管理界面，以远程管理和监控红帽企业 Linux 服务器性能
+> - 描述和使用红帽客户门户上的重要资源，并在红帽文档和知识库中查找信息
+> - 使用 Red Hat Insights 分析服务器问题，修复或解决问题，以及确认解决方案是否奏效
+>
+> 章节：
+>
+> - 分析和管理远程服务器（及引导式练习）
+> - 创建诊断报告（及引导式练习）
+> - 通过红帽智能分析工具检测和解决问题（及测验）
 
 ## 综合复习
 

@@ -1,5 +1,33 @@
 {
-    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
-    "todo-tree.tree.showBadges": true,
-    "todo-tree.tree.disableCompactFolders": false
+    "cSpell.words": [
+        "autoconnect",
+        "chage",
+        "chronyc",
+        "chronyd",
+        "cpio",
+        "getent",
+        "ifname",
+        "iname",
+        "journalctl",
+        "killall",
+        "lpwd",
+        "mmin",
+        "nmcli",
+        "nslookup",
+        "pkill",
+        "remotehost",
+        "repolist",
+        "rpm2cpio",
+        "rpms",
+        "rsyslog",
+        "sgid",
+        "sysconfig",
+        "timedatectl",
+        "tracepath",
+        "traceroute",
+        "updatedb",
+        "userdel",
+        "usermod",
+        "xattrs"
+    ]
 }
