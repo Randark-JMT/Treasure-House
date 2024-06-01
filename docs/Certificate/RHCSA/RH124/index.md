@@ -1486,7 +1486,11 @@ Grading lab.
 Overall lab grade: FAIL
 ```
 
-有点问题，不知道具体怎么操作的，已经按照教材的 exp 执行过了，还是不对
+:::warning
+
+有点问题，不知道目录的权限设置具体怎么操作的，已经按照教材的 exp 执行过了，还是不对
+
+:::
 
 ### 配置和管理服务器
 
@@ -1496,31 +1500,365 @@ Overall lab grade: FAIL
 - 为 `student` 用户生成 SSH 密钥。不要使用密语对该密钥进行保护。将私钥和公钥分别保存为 `/home/student/.ssh/review3_key` 和 `/home/student/.ssh/review_key.pub` 文件
 - 在 `servera` 上配置 `student` 用户，以接受通过 `review3_key`SSH 密钥对进行登录身份验证。`serverb` 上的 `student` 用户应该无需输入密码，就能使用 SSH 来登录 `servera`
 - 在 `serverb` 上配置 sshd 服务，以禁止 `root` 用户进行登录
-- 在`serverb`上配置`sshd`服务，以禁止用户使用其密码进行登录。用户仍应能够使用SSH密钥对进行登录身份验证
-- 
+- 在 `serverb` 上配置 `sshd` 服务，以禁止用户使用其密码进行登录。用户仍应能够使用 SSH 密钥对进行登录身份验证
+- 创建 `/tmp/log.tar` tar 存档，其包含 `serverb` 上 `/var/log` 目录的内容。使用 `review3_key` 私钥以 `student` 用户验证身份，将 tar 存档远程传输到 `servera` 上的 `/tmp` 目录
+- 配置 `serverb` 上的 `rsyslog` 服务，将所有优先级为 debug 或更高的服务记录到 `/var/log/grading-debug` 文件。在 `/etc/rsyslog.d/grading-debug.conf` 文件中定义配置。通过使用任何设备，生成优先级为 debug、且饱含 `Debug Testing` 文本的 syslog 消息
+- 在 `serverb` 计算机上安装 `zsh` 软件包
+- 将 `serverb` 的时区设为 `Asia/Kolkata`
 
 部署环境
 
+```shell
+[student@workstation ~]$ lab start rhcsa-rh124-review3
+
+Starting lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Installing sshpass package on serverb ............................................................................................................................... SUCCESS
+ · Backing up /etc/ssh/sshd_config on serverb .......................................................................................................................... SUCCESS
+ · Ensuring that custom log files do not exist on serverb .............................................................................................................. SUCCESS
+ · Recording pre-Lab time zone on serverb .............................................................................................................................. SUCCESS
+ · Ensuring that zsh is not installed on serverb ....................................................................................................................... SUCCESS
+```
+
 开始测验
 
+```shell
+[student@workstation ~]$ ssh student@serverb
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Register this system with Red Hat Insights: insights-client --register
+Create an account or view all your systems at https://red.ht/insights-dashboard
+Last login: Sat Jun  1 03:30:01 2024 from 172.25.250.9
+[student@serverb ~]$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/student/.ssh/id_rsa): /home/student/.ssh/review3_key
+Created directory '/home/student/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/student/.ssh/review3_key
+Your public key has been saved in /home/student/.ssh/review3_key.pub
+The key fingerprint is:
+SHA256:1NliMvl0wHqq4Ka4Nf9S05/YY3Vwxvo1fcUGFdCrXds student@serverb.lab.example.com
+The key's randomart image is:
++---[RSA 3072]----+
+|         ..  .ooo|
+|         o.+  .. |
+|        =.* o. o.|
+|       ..*.o. +.=|
+|       .So.  =o.*|
+|    . o o   o..+E|
+|  o. o o + o o .o|
+| o o+ . . *   .  |
+|o..o.o.  . .     |
++----[SHA256]-----+
+[student@serverb ~]$ ssh-copy-id -i /home/student/.ssh/review3_key.pub student@servera
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/student/.ssh/review3_key.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+student@servera's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh'student@servera'"
+and check to make sure that only the key(s) you wanted were added.
+[student@serverb ~]$ sudo vim /etc/ssh/sshd_config
+# sshd 服务 - root 限制登录 的配置操作部分省略
+[student@serverb ~]$ sudo systemctl reload-or-restart sshd.service
+[student@serverb ~]$ sudo vim /etc/ssh/sshd_config
+# sshd 服务 - 限制密码登录 的配置操作部分省略
+[student@serverb ~]$ sudo systemctl reload-or-restart sshd.service
+[student@serverb ~]$ sudo tar -cvf /tmp/log.tar /var/log
+tar: Removing leading `/' from member names
+/var/log/
+/var/log/private/
+/var/log/rhsm/
+/var/log/rhsm/rhsmcertd.log
+/var/log/rhsm/rhsm.log
+/var/log/qemu-ga/
+/var/log/audit/
+/var/log/audit/audit.log
+/var/log/sssd/
+/var/log/sssd/sssd_kcm.log
+/var/log/chrony/
+/var/log/insights-client/
+/var/log/README
+/var/log/tallylog
+/var/log/wtmp
+/var/log/btmp
+/var/log/lastlog
+/var/log/messages
+/var/log/secure
+/var/log/maillog
+/var/log/spooler
+/var/log/tuned/
+/var/log/tuned/tuned.log
+/var/log/cloud-init.log
+/var/log/cloud-init-output.log
+/var/log/cron
+/var/log/dnf.log
+/var/log/dnf.librepo.log
+/var/log/dnf.rpm.log
+/var/log/hawkey.log
+/var/log/kdump.log
+/var/log/samba/
+/var/log/samba/old/
+/var/log/boot.log
+/var/log/firewalld
+[student@serverb ~]$ sftp student@servera
+student@servera's password:
+Connected to servera.
+sftp> cd /tmp
+sftp> put /tmp/log.tar
+Uploading /tmp/log.tar to /tmp/log.tar
+log.tar                                                                                                                                         100% 3060KB  12.2MB/s   00:00
+sftp> exit
+[student@serverb ~]$ sudo vim /etc/rsyslog.d/grading-debug.conf
+[student@serverb ~]$ cat /etc/rsyslog.d/grading-debug.conf
+*.debug /var/log/grading-debug
+[student@serverb ~]$ sudo systemctl restart rsyslog.service
+[student@serverb ~]$ logger -p debug "Debug Testing"
+[student@serverb ~]$ sudo dnf install zsh
+Last metadata expiration check: 3:12:06 ago on Sat 01 Jun 2024 06:09:06 AM EDT.
+Dependencies resolved.
+==================================================================================================================================================================================
+ Package                          Architecture                        Version                                  Repository                                                    Size
+==================================================================================================================================================================================
+Installing:
+ zsh                              x86_64                              5.8-9.el9                                rhel-9.0-for-x86_64-baseos-rpms                              3.2 M
+
+Transaction Summary
+==================================================================================================================================================================================
+Install  1 Package
+
+Total download size: 3.2 M
+Installed size: 7.6 M
+Is this ok [y/N]: y
+Downloading Packages:
+zsh-5.8-9.el9.x86_64.rpm                                                                                                                          9.7 MB/s | 3.2 MB     00:00
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                                                             9.4 MB/s | 3.2 MB     00:00
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                                                          1/1
+  Installing       : zsh-5.8-9.el9.x86_64                                                                                                                                     1/1
+  Running scriptlet: zsh-5.8-9.el9.x86_64                                                                                                                                     1/1
+  Verifying        : zsh-5.8-9.el9.x86_64                                                                                                                                     1/1
+
+Installed:
+  zsh-5.8-9.el9.x86_64
+
+Complete!
+[student@serverb ~]$ sudo timedatectl set-timezone Asia/Kolkata
+```
+
 检验操作
+
+```shell
+[student@workstation ~]$ lab grade rhcsa-rh124-review3
+
+Grading lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Verifying SSH keys on serverb ....................................................................................................................................... SUCCESS
+ · Evaluating root login settings on serverb ........................................................................................................................... SUCCESS
+ · Evaluating password login settings on serverb ....................................................................................................................... SUCCESS
+ · Verifying archives on servera ....................................................................................................................................... SUCCESS
+ · Verifying archives on serverb ....................................................................................................................................... SUCCESS
+ · Verifying syslog custom configuration on serverb .................................................................................................................... SUCCESS
+ · Verifying time zone on serverb ...................................................................................................................................... SUCCESS
+ · Verifying that zsh is installed ..................................................................................................................................... SUCCESS
+
+Overall lab grade: PASS
+```
 
 ### 管理网络
 
 规范
 
+- 在 `serverb` 上，确定以太网接口名称及其活跃连接配置文件
+- 在 `serverb` 上，为可用的以太网接口激活 `static` 连接配置文件。`static` 配置文件以静态形式设定网络设置，不使用 DHCP。设置 `static` 配置文件，以使用下表中的网络设置
+  - IPv4 地址：172.25.250.111
+  - 子网掩码：255.255.255.0
+  - 网关：172.25.250.254
+  - DNS 服务器：172.25.250.254
+- 将 `serverb` 主机名设为 `server-review4.lab4.example.com`
+- 在 `serverb` 上，将 `client-review4` 设为 `servera 172.25.250.10`IPv4 地址的规范主机名
+- 使用额外的 IPv4 地址 `172.25.250.211` 和子网掩码 `255.255.255.0` 来配置 `static` 连接配置集。不要删除现有的 IPv4 地址。确保当 `static` 连接处于活动状态时，`serverb` 能够对所有地址做出响应
+- 在 `serverb` 上，通过激活原先的网络连接配置集来恢复原先的网络设置
+
 部署环境
+
+```shell
+[student@workstation ~]$ lab start rhcsa-rh124-review4
+
+Starting lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Backing up the original /etc/hosts file on serverb .................................................................................................................. SUCCESS
+```
 
 开始测验
 
+```shell
+# 由于涉及到编辑网卡配置，所以直接通过 virsh 连接到虚拟机
+[root@foundation0 ~]# virsh console serverb
+Connected to domain 'serverb'
+Escape character is ^] (Ctrl +])
+
+serverb login: root
+Password:
+Last login: Sat Jun  1 03:35:11 from 172.25.250.9
+[root@serverb ~]# nmcli connection show
+NAME                UUID                                  TYPE      DEVICE
+Wired connection 1  3968ff88-8373-3810-a63f-1cdbb896767e  ethernet  eth0
+[root@serverb ~]# nmcli device status
+DEVICE  TYPE      STATE      CONNECTION
+eth0    ethernet  connected  Wired connection 1
+lo      loopback  unmanaged  --
+[root@serverb ~]# nmcli connection add con-name static ifname eth0 type ethernet \
+> ipv4.address 172.25.250.111/24 \
+> ipv4.gateway 172.25.250.254 \
+> ipv4.dns 172.25.250.254 \
+> ipv4.method manual
+Connection 'static' (85e95b1d-cbfb-476e-bf13-32b65e77fbbd) successfully added.
+[root@serverb ~]# nmcli connection up static
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/2)
+[root@serverb ~]# hostnamectl
+ Static hostname: serverb.lab.example.com
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: 3c373df75dc447cdb08f9cca704a8aa6
+         Boot ID: 30bcf7fdf85d41ed9cef6eac99eb54c6
+  Virtualization: kvm
+Operating System: Red Hat Enterprise Linux 9.0 (Plow)
+     CPE OS Name: cpe:/o:redhat:enterprise_linux:9::baseos
+          Kernel: Linux 5.14.0-70.13.1.el9_0.x86_64
+    Architecture: x86-64
+ Hardware Vendor: Red Hat
+  Hardware Model: KVM
+[root@serverb ~]# hostnamectl set-hostname server-review4.lab4.example.com
+[root@serverb ~]# echo "172.25.250.10 client-review4" >> /etc/hosts
+[root@serverb ~]# nmcli connection modify static \
+> +ipv4.address 172.25.250.211/24
+[root@serverb ~]# nmcli connection up static
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)
+[root@serverb ~]# nmcli device status
+DEVICE  TYPE      STATE      CONNECTION
+eth0    ethernet  connected  static
+lo      loopback  unmanaged  --
+[root@serverb ~]# nmcli connection up "Wired connection 1"
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/4)
+[root@serverb ~]# nmcli device status
+DEVICE  TYPE      STATE      CONNECTION
+eth0    ethernet  connected  Wired connection 1
+lo      loopback  unmanaged  --
+```
+
 检验操作
+
+```shell
+[student@workstation ~]$ lab grade rhcsa-rh124-review4
+
+Grading lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Verifying the static connection on serverb .......................................................................................................................... SUCCESS
+ · Verifying DNS on serverb ............................................................................................................................................ SUCCESS
+ · Verifying new IP adresses on serverb ................................................................................................................................ SUCCESS
+ · Verifying the canonical name on serverb ............................................................................................................................. SUCCESS
+ · Verifying the hostname on serverb ................................................................................................................................... SUCCESS
+
+Overall lab grade: PASS
+```
 
 ### 挂载文件系统和查找文件
 
 规范
 
+- 以 `student` 用户身份登录 `serverb`，并切换到 `root` 用户
+- 识别 `serverb` 计算机上包含 XFS 文件系统的已卸载块设备。将块设备挂载到 `/review5-disk` 目录
+- 查找 `review5-path` 文件。创建 `/review5-disk/review5-path.txt` 文件，它应包含由 `review5-path` 文件的绝对路径组成的一行内容
+- 查找 `contractor1` 用户和 `contractor` 组拥有的所有文件。这些文件还必须具有八进制权限 640。将这些文件的列表保存到 `/review5-disk/review5-perms.txt` 文件
+- 查找大小为 100 字节的所有文件。将这些文件的绝对路径保存到 `/review5-disk/review5-size.txt`
+
 部署环境
+
+```shell
+[student@workstation ~]$ lab start rhcsa-rh124-review5
+
+Starting lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Creating a filesystem on serverb .................................................................................................................................... SUCCESS
+ · Creating required user contractor1 on serverb ....................................................................................................................... SUCCESS
+ · Creating contractor group on serverb ................................................................................................................................ SUCCESS
+ · Creating first file on serverb ...................................................................................................................................... SUCCESS
+ · Creating second file on serverb ..................................................................................................................................... SUCCESS
+ · Changing second file owner and group on serverb ..................................................................................................................... SUCCESS
+ · Changing second file permissions on serverb ......................................................................................................................... SUCCESS
+ · Creating third file on serverb ...................................................................................................................................... SUCCESS
+```
 
 开始测验
 
+```shell
+[student@workstation ~]$ ssh student@serverb
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Register this system with Red Hat Insights: insights-client --register
+Create an account or view all your systems at https://red.ht/insights-dashboard
+Last login: Sat Jun  1 10:04:26 2024 from 172.25.250.9
+[student@serverb ~]$ sudo -i
+[sudo] password for student: 
+[root@serverb ~]# lsblk -fs
+NAME  FSTYPE FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+vda1                                                                         
+└─vda                                                                        
+vda2  vfat   FAT16       7B77-95E7                             192.8M     3% /boot/efi
+└─vda                                                                        
+vda3  xfs          boot  5e75a2b9-1367-4cc8-bb38-4d6abc3964b8  334.7M    32% /boot
+└─vda                                                                        
+vda4  xfs          root  fb535add-9799-4a27-b8bc-e8259f39a767    7.6G    18% /
+└─vda                                                                        
+vdb1  xfs                d08c8564-3889-4900-bd08-ae66153992ca                
+└─vdb                                                                        
+vdc                                                                          
+vdd   
+[root@serverb ~]# mkdir /review5-disk
+[root@serverb ~]# mount /dev/vdb1 /review5-disk
+[root@serverb ~]# find / -name review5-path
+/var/tmp/review5-path
+[root@serverb ~]# find / -name review5-path > /review5-disk/review5-path.txt
+[root@serverb ~]# find / -user contractor1 -group contractor -perm 640
+find: ‘/proc/33685/task/33685/fd/5’: No such file or directory
+find: ‘/proc/33685/task/33685/fdinfo/5’: No such file or directory
+find: ‘/proc/33685/fd/6’: No such file or directory
+find: ‘/proc/33685/fdinfo/6’: No such file or directory
+/usr/share/review5-perms
+[root@serverb ~]# find / -user contractor1 -group contractor -perm 640 > /review5-disk/review5-perms.txt
+find: ‘/proc/33687/task/33687/fd/5’: No such file or directory
+find: ‘/proc/33687/task/33687/fdinfo/5’: No such file or directory
+find: ‘/proc/33687/fd/6’: No such file or directory
+find: ‘/proc/33687/fdinfo/6’: No such file or directory
+[root@serverb ~]# find / -size 100c > /review5-disk/review5-size.txt
+```
+
 检验操作
+
+```shell
+[student@workstation ~]$ lab grade rhcsa-rh124-review5
+
+Grading lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Confirming if /review5-disk is mounted on serverb ................................................................................................................... SUCCESS
+ · Evaluating the first file content on serverb ........................................................................................................................ SUCCESS
+ · Evaluating the second file content on serverb ....................................................................................................................... SUCCESS
+ · Evaluating the third file content on serverb ........................................................................................................................ SUCCESS
+
+Overall lab grade: PASS
+```
