@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # RH134
 
-## 提高命令行生产力
+## 提高命令行运行效率
 
 > 借助 Bash shell、shell 脚本和红帽企业 Linux 实用工具的各种高级功能，更加高效地运行命令。
 

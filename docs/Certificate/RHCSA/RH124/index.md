@@ -4,6 +4,22 @@ sidebar_position: 1
 
 # RH124
 
+## 环境初始化
+
+```shell
+# 清除之前的课程缓存
+[kiosk@foundation0 ~]$ rht-clearcourse all
+
+# 指定课程环境为 RH124
+[kiosk@foundation0 ~]$ rht-setcourse rh124
+
+# 首先重新部署 classroom 虚拟机环境
+[kiosk@foundation0 ~]$ rht-vmctl reset classroom
+
+# 重新部署所有虚拟机
+[kiosk@foundation0 ~]$ rht-vmctl reset all
+```
+
 ## 红帽企业 Linux 入门
 
 > 介绍开源、Linux、Linux 发行版和红帽企业 Linux，并明确相关定义
@@ -1275,6 +1291,236 @@ $ find / -type f -links +1
 > - 创建诊断报告（及引导式练习）
 > - 通过红帽智能分析工具检测和解决问题（及测验）
 
+### 总结
+
+- Web 控制台是一个基于 Web 的服务器管理界面，它的基础时开源的 `cockpit` 服务
+- Web 控制台提供系统性能图表、用于管理系统配置和检查日志的图形工具，以及交互式终端界面
+- 通过红帽客户门户，您可以访问红帽产品的文档、下载项目、优化工具、支持案例管理，以及订阅和权力管理
+- `redhat-support-tool` 命令行工具查询知识库并处理支持案例
+- 红帽智能分析是一款基于 SaaS 的预测分析工具，可帮助您识别和修复系统的安全性、性能、可用性和稳定性威胁
+
 ## 综合复习
 
 > 完成实训练习，以回顾本课程所涵盖的内容
+
+### 从命令行管理文件
+
+规范
+
+- 以 `student` 用户身份登录 serverb
+- 创建 `/home/student/grading` 目录
+- 在 `/home/student/grading` 目录中创建以下三个空文件：`grade1`、`grade2` 和 `grade3`
+- 将 `/home/student/bin/manage` 文件的前五行采集到 `/home/student/grading/review.txt` 文件中
+- 将 `/home/student/bin/manage` 文件的最后三行附加到 `/home/student/grading/review.txt` 文件
+- 将 `/home/student/grading/review.txt` 文件复制到 `/home/student/grading/review-copy.txt` 文件
+- 编辑 `/home/student/grading/review-copy.txt` 文件，使 `Test JJ` 行出现两次
+- 编辑 `/home/student/grading/review-copy.txt` 文件以删除 `Test HH` 行
+- 编辑 `/home/student/grading/review-copy.txt` 文件，使得 `Test BB` 行和 `Test CC` 行之间存在 `A new line` 行
+- 创建 `/home/student/grading/grade1` 文件的硬链接，取名为 `/home/student/hardcopy`
+- 创建 `/home/student/grading/grade2` 文件的符号链接，取名为 `/home/student/softcopy`
+- 将列出 `/boot` 目录的内容的命令输出保存到 `/home/student/grading/longlisting.txt` 文件。输出应该是一个长列表，内含各个文件的文件权限、所有者和组所有者、大小以及修改日期。输出中应当省略隐藏文件
+
+部署环境
+
+```shell
+[student@workstation ~]$ lab start rhcsa-rh124-review1
+
+Starting lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Creating /home/student/bin folder on serverb ........................................................................................................................ SUCCESS
+ · Creating /home/student/bin/manage file on serverb ................................................................................................................... SUCCESS
+ · Changing /home/student/bin folder owner and group ................................................................................................................... SUCCESS
+ · Creating /tmp/md5sum.txt file on serverb ............................................................................................................................ SUCCESS
+```
+
+开始测验
+
+```shell
+[student@workstation ~]$ ssh student@serverb
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Register this system with Red Hat Insights: insights-client --register
+Create an account or view all your systems at https://red.ht/insights-dashboard
+Last login: Sat Jun  1 02:07:33 2024 from 172.25.250.250
+[student@serverb ~]$ mkdir /home/student/grading
+[student@serverb ~]$ cd /home/student/grading
+[student@serverb grading]$ touch grade1 grade2 grade3
+[student@serverb grading]$ ll
+total 0
+-rw-r--r--. 1 student student 0 Jun  1 02:27 grade1
+-rw-r--r--. 1 student student 0 Jun  1 02:27 grade2
+-rw-r--r--. 1 student student 0 Jun  1 02:27 grade3
+[student@serverb grading]$ head -n 5 /home/student/bin/manage > /home/student/grading/review.txt
+[student@serverb grading]$ tail -n 3 /home/student/bin/manage >> /home/student/grading/review.txt
+[student@serverb grading]$ cat /home/student/grading/review.txt
+Test AA
+Test BB
+Test CC
+Test DD
+Test EE
+Test HH
+Test II
+Test JJ
+[student@serverb grading]$ cp /home/student/grading/review.txt /home/student/grading/review-copy.txt
+[student@serverb grading]$ vim /home/student/grading/review-copy.txt
+# 中间的 vim 操作省略
+[student@serverb grading]$ ln /home/student/grading/grade1 /home/student/hardcopy
+[student@serverb grading]$ ls -lih /home/student/hardcopy
+25169628 -rw-r--r--. 2 student student 0 Jun  1 02:27 /home/student/hardcopy
+[student@serverb grading]$ ls -lih /home/student/grading/grade1
+25169628 -rw-r--r--. 2 student student 0 Jun  1 02:27 /home/student/grading/grade1
+[student@serverb grading]$ ln -s /home/student/grading/grade2 /home/student/softcopy
+[student@serverb grading]$ ls -lih /home/student/softcopy
+15736 lrwxrwxrwx. 1 student student 28 Jun  1 02:39 /home/student/softcopy -> /home/student/grading/grade2
+[student@serverb ~]$ ls -l /boot > /home/student/grading/longlisting.txt
+```
+
+检验操作
+
+```shell
+[student@workstation ~]$ lab grade rhcsa-rh124-review1
+
+Grading lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Verifying /home/student/bin/manage file ............................................................................................................................. SUCCESS
+ · Verifying /home/student/grading/review.txt file exists .............................................................................................................. SUCCESS
+ · Verifying /home/student/grading/review-copy.txt file exists ......................................................................................................... SUCCESS
+ · Verifying /home/student/grading/longlisting.txt file exists ......................................................................................................... SUCCESS
+ · Verifying /home/student/grading folder exists ....................................................................................................................... SUCCESS
+ · Verifying /home/student/grading/grade1 file exists and is empty ..................................................................................................... SUCCESS
+ · Verifying /home/student/grading/grade2 file exists and is empty ..................................................................................................... SUCCESS
+ · Verifying /home/student/grading/grade3 file exists and is empty ..................................................................................................... SUCCESS
+ · Evaluating the hard link ............................................................................................................................................ SUCCESS
+ · Evaluating the soft link ............................................................................................................................................ SUCCESS
+ · Evaluating the longlisting file ..................................................................................................................................... SUCCESS
+ · Evaluating the manage-files-copy.txt file ........................................................................................................................... SUCCESS
+
+Overall lab grade: PASS
+```
+
+### 管理用户和组、权限以及进程
+
+规范
+
+- 以 `student` 用户身份登录 `serverb`
+- 识别和终止当前使用最多 CPU 时间的进程
+- 创建 `database` 组，其 GID 为 50000
+- 创建 `dbadmin1` 用户，并使用以下要求对其进行配置
+  - 添加 `database` 作为补充组
+  - 将密码设置为 `redhat`，并强制在第一次登录时更改密码
+  - 允许上次密码更改起 10 天后更改密码
+  - 将密码到期时间设为上次密码更改后 30 天
+  - 允许用户使用 `sudo` 命令以超级用户身份运行任何指令
+  - 为 `dbadmin1` 用户将默认 umask 配置为 007
+- 创建 `/home/dbadmin1/grading/review2` 目录，将 `dbadmin1` 设为所属用户，`database` 组设为所属组
+- 配置 `/home/dbadmin1/grading/review2` 目录，使 `database` 组拥有此目录中创建的任何文件，无论该文件是由哪个用户创建的。配置目录的权限，以允许 `database` 组成员访问该目录以及在其中创建文件。所有其他用户应具有该目录的读取和执行权限
+- 确保仅允许用户从 `/home/dbadmin1/grading/review2` 目录中删除自己拥有的文件
+
+部署环境
+
+```shell
+[student@workstation ~]$ lab start rhcsa-rh124-review2
+
+Starting lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Creating ansible repo on serverb .................................................................................................................................... SUCCESS
+ · Ensuring the CPU intensive process is not present on serverb ........................................................................................................ SUCCESS
+ · Creating a CPU intensive process on serverb ......................................................................................................................... SUCCESS
+ · Saving the PID for the CPU intensive process on serverb ............................................................................................................. SUCCESS
+ · Ensuring dbadmin1 user does not exist on serverb .................................................................................................................... SUCCESS
+ · Ensuring database group does not exist on serverb ................................................................................................................... SUCCESS
+ · Ensuring dbadmin1 is not present in sudoers file .................................................................................................................... SUCCESS
+ · Ensuring dbadmin1 is not present in sudoers folder .................................................................................................................. SUCCESS
+ · Creating /home/student/grading folder on serverb .................................................................................................................... SUCCESS
+ · Changing owner and group on /home/student/grading folder on serverb ................................................................................................. SUCCESS
+ · Backing up /etc/sudoers on serverb .................................................................................................................................. SUCCESS
+```
+
+开始测验
+
+```shell
+# top 相关操作省略
+[root@serverb ~]# groupadd -g 50000 database
+[root@serverb ~]# useradd dbadmin1
+[root@serverb ~]# usermod -G database dbadmin1
+[root@serverb ~]# echo redhat | passwd --stdin dbadmin1
+Changing password for user dbadmin1.
+passwd: all authentication tokens updated successfully.
+[root@serverb ~]# chage -d 0 dbadmin1
+[root@serverb ~]# chage -m 10 dbadmin1
+[root@serverb ~]# chage -M 30 dbadmin1
+[root@serverb ~]# visudo
+# visudo 具体操作省略
+[root@serverb ~]# su - dbadmin1
+[dbadmin1@serverb ~]$ echo "umask 007" > .bashrc
+[dbadmin1@serverb ~]$ mkdir -p /home/dbadmin1/grading/review2
+[dbadmin1@serverb ~]$ chown -R dbadmin1:database /home/dbadmin1/grading/review2
+[dbadmin1@serverb ~]$ chown -R dbadmin1:database /home/dbadmin1/
+[dbadmin1@serverb ~]$ chmod -R g+x /home/dbadmin1/
+[dbadmin1@serverb ~]$ chmod g+s /home/dbadmin1/grading/review2
+[dbadmin1@serverb ~]$ chmod 755 /home/dbadmin1/grading/review2
+[dbadmin1@serverb ~]$ chmod o+t /home/dbadmin1/grading/review2
+```
+
+检验操作
+
+```shell
+[student@workstation ~]$ lab grade rhcsa-rh124-review2
+
+Grading lab.
+
+ · Checking lab systems ................................................................................................................................................ SUCCESS
+ · Verifying termination of CPU intensive process on serverb ........................................................................................................... SUCCESS
+ · Verifying if the database group exists on serverb ................................................................................................................... SUCCESS
+ · Verifying if dbadmin1 belongs to database group on serverb .......................................................................................................... SUCCESS
+ · Verifying the password expiration for the dbadmin1 user ............................................................................................................. SUCCESS
+ · Evaluating properties of the review2 directory on serverb ........................................................................................................... FAIL
+    - Command did not exit with the expected code
+    - Expected: 0, Received: 1
+ · Evaluating the sudo configuration of dbadmin1 on serverb ............................................................................................................ SUCCESS
+ · Evaluating the umask of dbadmin1 on serverb ......................................................................................................................... SUCCESS
+
+Overall lab grade: FAIL
+```
+
+有点问题，不知道具体怎么操作的，已经按照教材的 exp 执行过了，还是不对
+
+### 配置和管理服务器
+
+规范
+
+- 以 `student` 用户身份登录 `serverb`
+- 为 `student` 用户生成 SSH 密钥。不要使用密语对该密钥进行保护。将私钥和公钥分别保存为 `/home/student/.ssh/review3_key` 和 `/home/student/.ssh/review_key.pub` 文件
+- 在 `servera` 上配置 `student` 用户，以接受通过 `review3_key`SSH 密钥对进行登录身份验证。`serverb` 上的 `student` 用户应该无需输入密码，就能使用 SSH 来登录 `servera`
+- 在 `serverb` 上配置 sshd 服务，以禁止 `root` 用户进行登录
+- 在`serverb`上配置`sshd`服务，以禁止用户使用其密码进行登录。用户仍应能够使用SSH密钥对进行登录身份验证
+- 
+
+部署环境
+
+开始测验
+
+检验操作
+
+### 管理网络
+
+规范
+
+部署环境
+
+开始测验
+
+检验操作
+
+### 挂载文件系统和查找文件
+
+规范
+
+部署环境
+
+开始测验
+
+检验操作
