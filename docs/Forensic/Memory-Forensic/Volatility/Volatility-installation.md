@@ -77,10 +77,10 @@ sudo apt install python-pip
 在 pip 安装成功之后，安装 Volatility 所需的第三方包
 
 ```shell
-sudo pip2 install distorm3 pycrtptodome -i https://pypi.tuna.tsinghua.edu.cn/simple
+sudo pip2 install distorm3 pycryptodome -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-![尝试安装 pycrtptodome](img/image_20230742-104221.png)
+![尝试安装 pycryptodome](img/image_20230742-104221.png)
 
 可以看到，在安装过程中出现了大片的红色报错，但是不要慌张，看向最底下的报错信息：
 
@@ -97,10 +97,10 @@ sudo apt install python2-dev
 安装好 python2-dev 软件包之后，就可以继续之前操作
 
 ```shell
-sudo pip2 install distorm3 pycrtptodome -i https://pypi.tuna.tsinghua.edu.cn/simple
+sudo pip2 install distorm3 pycryptodome -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-![继续安装 pycrtptodome](img/image_20230744-104424.png)
+![继续安装 pycryptodome](img/image_20230744-104424.png)
 
 让我们继续运行`Volatility 2`看看效果
 
