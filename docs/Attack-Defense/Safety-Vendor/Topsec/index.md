@@ -5,8 +5,6 @@ toc_max_heading_level: 4
 
 # 天融信
 
-TODO 天融信待完善
-
 ## 基础网络
 
 ## 工业互联网安全

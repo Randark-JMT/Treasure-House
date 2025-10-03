@@ -5,6 +5,10 @@ authors: Randark
 tags: ["Memory-Forensic"]
 ---
 
+只是一个 Linux 内存取证实验
+
+<!-- truncate -->
+
 新建虚拟机，使用 `ubuntu-22.04.2-desktop-amd64.iso` 作为安装镜像，正常完成安装，选择最小化安装，并且安装过程中不进行自动更新
 
 ![Ubuntu install option](img/image_20231037-233754.png)

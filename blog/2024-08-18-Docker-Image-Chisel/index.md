@@ -5,9 +5,13 @@ authors: Randark
 tags: [Docker]
 ---
 
+探究 Dockerfile 中的各个操作究竟对最终的镜像大小有多大的影响，并给出减小镜像体积的技巧
+
+<!-- truncate -->
+
 ## 基础镜像
 
-这里采用 [ctf-docker-template/web-lnmp-php73 at main · CTF-Archives/ctf-docker-template](https://github.com/CTF-Archives/ctf-docker-template/tree/main/web-lnmp-php73) 作为研究对象
+这里采用  [ctf-docker-template/web-lnmp-php73 at main · CTF-Archives/ctf-docker-template](https://github.com/CTF-Archives/ctf-docker-template/tree/main/web-lnmp-php73)  作为研究对象
 
 原始的 Dockerfile 为
 
@@ -127,7 +131,7 @@ ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
 
 由于每一个操作关键词 `RUN`, `COPY` 等都会在 image 中增加一个 layer 记录，带来额外的空间占用，所以可以对多个 `RUN` 语句进行整合
 
-优化后的Dockerfile为
+优化后的 Dockerfile 为
 
 ```dockerfile
 FROM ubuntu:22.04

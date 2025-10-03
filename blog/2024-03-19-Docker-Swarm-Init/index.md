@@ -5,13 +5,15 @@ authors: Randark
 tags: []
 ---
 
-> 文章内容为我个人的 Docker 实验集群，带有个人习惯，故并没有放在知识库正文
+文章内容为我个人的 Docker 实验集群，带有个人习惯，故并没有放在知识库正文
+
+<!-- truncate -->
 
 在文章开始之前，已经基于 Photon OS 部署了四台虚拟机，其中一台主节点，三台作为子节点
 
 ![img](img/image_20240335-163531.png)
 
-|   hostname    |   ip address    |
+|    hostname   |    ip address   |
 | :-----------: | :-------------: |
 |  docker-main  | 192.168.200.134 |
 | docker-node-1 | 192.168.200.135 |

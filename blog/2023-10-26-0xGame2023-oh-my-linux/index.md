@@ -5,6 +5,10 @@ authors: Randark
 tags: ["Memory-Forensic"]
 ---
 
+将我的 profile-builder 项目实际应用在 CTF 题目中的例子
+
+<!-- truncate -->
+
 首先，先分析镜像的内核信息：
 
 ```shell
@@ -21,7 +25,7 @@ Offset  Banner
 
 [Index of /debian-security/pool/main/l/linux](https://debian.sipwise.com/debian-security/pool/main/l/linux/)
 
-![linux-image-5.10.0-21-amd64-dbg_5.10.162-1_amd64.deb](img/image_20231022-192239.png)
+![linux-image-5.10.0-21-amd64-dbg\_5.10.162-1\_amd64.deb](img/image_20231022-192239.png)
 
 下载下来后，将其作为 `tar.xz` 文件进行解压缩，得到 `data.tar` 文件，解压缩制作符号表需要的文件：
 

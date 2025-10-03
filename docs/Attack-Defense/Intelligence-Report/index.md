@@ -18,8 +18,6 @@
 
 [报告文件](./Hackthebox/../HTB_BusinessCTF23_report.pdf)
 
-TODO 将现有收集到的报告文件整理到这里
-
 ## 长亭
 
 ## 深信服
