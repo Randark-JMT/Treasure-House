@@ -305,11 +305,58 @@ total 80
 34467565 -rw-r--r--    1 randark  staff    17K Aug 25 21:05 viper.py
 ```
 
+### Dockerfile 分析
+
+此镜像的 `Dockerfile` 也位于 `viperpython` 仓库中
+
+```shell
+$ pwd
+~/Users/randark/Develop/viper-9513b84d3d58/blobs/sha256/viperpython
+$ find . -name "Dockerfile"
+./root/viper/Docker/Dockerfile
+```
+
+具体的 `Dockerfile` 如下
+
+```dockerfile
+FROM registry.cn-shenzhen.aliyuncs.com/toys/viper-base:latest
+
+ARG ZSTD_COMPRESS=true
+ARG ZSTD_COMPRESS_LEVEL=22
+ARG COMPRESS_LAYER=true
+
+COPY viperpython /root/viper/
+COPY vipermsf /root/metasploit-framework/
+COPY viperjs/dist /root/viper/dist/
+COPY rex-core /root/rex-core/
+COPY rex-socket /root/rex-socket/
+
+RUN chmod a+x /root/viper/Docker/build.sh && ./root/viper/Docker/build.sh
+
+ENTRYPOINT ["viper", "init","-pw"]
+
+CMD ["diypassword"]
+
+#HEALTHCHECK CMD viper healthcheck
+```
+
 ## 镜像性能分析
+
+### Base Image 镜像性能分析
+
+在 `Dockerfile` 中可以看到，所使用的基础镜像是
+
+```docker
+FROM registry.cn-shenzhen.aliyuncs.com/toys/viper-base:latest
+```
+
+但是这个镜像是一个私有镜像没办法进行分析
+
+### Viper 镜像性能分析
 
 TODO 待填坑
 
-## Image Patch
+## 绕过收费限制
 
 既然已经有了源码和 Docker Image 镜像文件之后，其实就可以直接加上一层 Layer 实现付费逻辑的 patch 修改
 

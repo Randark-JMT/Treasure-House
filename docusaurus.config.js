@@ -21,7 +21,7 @@ const config = {
     projectName: 'Treasure-House', // Usually your repo name.
 
     onBrokenLinks: 'throw',
-    onBrokenMarkdownLinks: 'warn',
+    // onBrokenMarkdownLinks: 'warn',
 
     // Even if you don't use internalization, you can use this field to set useful
     // metadata like html lang. For example, if your site is Chinese, you may want
@@ -192,7 +192,8 @@ const config = {
             respectPrefersColorScheme: false,
         },
         prism: {
-            additionalLanguages: ['powershell', 'php', 'ini', 'json'],
+            theme: prismThemes.dracula,
+            additionalLanguages: ['powershell', 'php', 'ini', 'bash', 'docker'],
         },
         docs: {
             sidebar: {
@@ -202,6 +203,9 @@ const config = {
     },
     markdown: {
         mermaid: true,
+        hooks: {
+            onBrokenMarkdownLinks: 'warn'
+        }
     },
 };
 
