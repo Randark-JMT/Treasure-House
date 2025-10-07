@@ -20,7 +20,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # 敏感文章
-# docs/Attack-Defense/Safety-Vendor/Sangfor/SIP.md sxf社区已公开相关资料
-/blog/2024-10-14-Craft-Beer
 
 /.quarto/
+
+note.md
