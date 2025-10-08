@@ -20,7 +20,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # 敏感文章
+blog/2025-10-07-TrendMicro-VisionOne-Trial/**
+blog/2025-10-07-TrendMicro-VisionOne-Use/**
 
 /.quarto/
 
 note.md
+
