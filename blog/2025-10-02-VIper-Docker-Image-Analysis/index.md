@@ -354,13 +354,21 @@ FROM registry.cn-shenzhen.aliyuncs.com/toys/viper-base:latest
 
 ### Viper 镜像性能分析
 
-TODO 待填坑
+算了后面想想就不分析了，把 Elastic Search，Redis，Mysql，Python，Metasploit全部塞在一个容器，美名其曰方便部署，能有什么性能可言
 
 ## 绕过收费限制
 
 既然已经有了源码和 Docker Image 镜像文件之后，其实就可以直接加上一层 Layer 实现付费逻辑的 patch 修改
 
-TODO 待填坑
+根据对源码的审计，可以定位到两个文件
+
+- `/WebSocket/Handle/heartbeat.py` - 在定时循环的心跳包中，确认许可状态
+- `/Core/Handle/license.py` - 输入许可证确认许可证状态
+
+那么对这两个函数的逻辑进行针对性修改即可，这里给出两个思路
+
+1. 直接根据源码，修改对应文件之后，覆盖镜像即可
+2. 劫持 viper 容器向 `https://license.viperrtp.com/api/v1/license` 发起的请求
 
 ## 镜像安全分析
 
