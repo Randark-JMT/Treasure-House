@@ -59,10 +59,19 @@
 <div class="language-docker codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-docker codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#F8F8F2"><span class="token instruction keyword" style="color:rgb(189, 147, 249);font-style:italic">FROM</span><span class="token instruction"> registry.cn-shenzhen.aliyuncs.com/toys/viper-base:latest</span><br></span></code></pre></div></div>
 <p>但是这个镜像是一个私有镜像没办法进行分析</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="viper-镜像性能分析">Viper 镜像性能分析<a href="http://treasure-house.randark.site/blog/2025-10-02-VIper-Docker-Image-Analysis#viper-%E9%95%9C%E5%83%8F%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90" class="hash-link" aria-label="Viper 镜像性能分析的直接链接" title="Viper 镜像性能分析的直接链接" translate="no">​</a></h3>
-<p>TODO 待填坑</p>
+<p>算了后面想想就不分析了，把 Elastic Search，Redis，Mysql，Python，Metasploit全部塞在一个容器，美名其曰方便部署，能有什么性能可言</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="绕过收费限制">绕过收费限制<a href="http://treasure-house.randark.site/blog/2025-10-02-VIper-Docker-Image-Analysis#%E7%BB%95%E8%BF%87%E6%94%B6%E8%B4%B9%E9%99%90%E5%88%B6" class="hash-link" aria-label="绕过收费限制的直接链接" title="绕过收费限制的直接链接" translate="no">​</a></h2>
 <p>既然已经有了源码和 Docker Image 镜像文件之后，其实就可以直接加上一层 Layer 实现付费逻辑的 patch 修改</p>
-<p>TODO 待填坑</p>
+<p>根据对源码的审计，可以定位到两个文件</p>
+<ul>
+<li><code>/WebSocket/Handle/heartbeat.py</code> - 在定时循环的心跳包中，确认许可状态</li>
+<li><code>/Core/Handle/license.py</code> - 输入许可证确认许可证状态</li>
+</ul>
+<p>那么对这两个函数的逻辑进行针对性修改即可，这里给出两个思路</p>
+<ol>
+<li>直接根据源码，修改对应文件之后，覆盖镜像即可</li>
+<li>劫持 viper 容器向 <code>https://license.viperrtp.com/api/v1/license</code> 发起的请求</li>
+</ol>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="镜像安全分析">镜像安全分析<a href="http://treasure-house.randark.site/blog/2025-10-02-VIper-Docker-Image-Analysis#%E9%95%9C%E5%83%8F%E5%AE%89%E5%85%A8%E5%88%86%E6%9E%90" class="hash-link" aria-label="镜像安全分析的直接链接" title="镜像安全分析的直接链接" translate="no">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="git-凭据泄漏">Git 凭据泄漏<a href="http://treasure-house.randark.site/blog/2025-10-02-VIper-Docker-Image-Analysis#git-%E5%87%AD%E6%8D%AE%E6%B3%84%E6%BC%8F" class="hash-link" aria-label="Git 凭据泄漏的直接链接" title="Git 凭据泄漏的直接链接" translate="no">​</a></h3>
 <p>这一点问题非常大了，尤其是使用传统明文凭据的 git 平台</p>
