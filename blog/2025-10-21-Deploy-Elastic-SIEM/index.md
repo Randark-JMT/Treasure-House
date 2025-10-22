@@ -9,7 +9,7 @@ tags: []
 
 <!-- truncate -->
 
-本文基于 `Ubuntu Server 24.04.3` 进行部署
+本文基于 `Ubuntu Server 24.04.3` 进行部署，性能为 `4h4g`
 
 ```shell
 randark@elastic-server:~$ lsb_release -a
@@ -18,108 +18,56 @@ Distributor ID: Ubuntu
 Description:    Ubuntu 24.04.3 LTS
 Release:        24.04
 Codename:       noble
+randark@elastic-server:~$ ifconfig 
+ens33: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.200.200  netmask 255.255.255.0  broadcast 192.168.200.255
+        inet6 fe80::20c:29ff:fee5:696e  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:e5:69:6e  txqueuelen 1000  (Ethernet)
+        RX packets 956  bytes 615902 (615.9 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 517  bytes 106942 (106.9 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 106  bytes 9093 (9.0 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 106  bytes 9093 (9.0 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
 
-## 部署 Elasticsearch
+## 安装 Elasticsearch
 
-参考 [Install Elasticsearch from archive on Linux or MacOS | Elastic Docs](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-with-debian-package)
-
-执行
+使用 `apt` 进行安装，首先是导入 Elastic 的 PGP 公钥
 
 ```shell
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
-sudo apt update
+```
+
+然后安装 Elasticsearch APT 储存库
+
+```shell
 sudo apt-get install apt-transport-https
 echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/9.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-9.x.list
-# 添加 Elastic APT 仓库
+```
+
+随后执行安装
+
+```shell
 sudo apt-get update && sudo apt-get install elasticsearch
 ```
 
-理论上应当看到
+安装成功之后，应该能够看到以下提示
 
-```shell
-randark@elastic-server:~$ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
-randark@elastic-server:~$ sudo apt update
-Get:4 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
-Hit:1 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble InRelease                              
-Hit:2 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble-updates InRelease                      
-Hit:3 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble-backports InRelease
-Get:5 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.6 kB]
-Get:6 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
-Get:7 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.3 kB]
-Get:8 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [208 B]                                                                                                                     
-Fetched 200 kB in 7s (29.6 kB/s)                                                                                                                                                                               
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-28 packages can be upgraded. Run 'apt list --upgradable' to see them.
-randark@elastic-server:~$ sudo apt-get install apt-transport-https
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-The following NEW packages will be installed:
-  apt-transport-https
-0 upgraded, 1 newly installed, 0 to remove and 28 not upgraded.
-Need to get 3,970 B of archives.
-After this operation, 36.9 kB of additional disk space will be used.
-Get:1 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble-updates/universe amd64 apt-transport-https all 2.8.3 [3,970 B]
-Fetched 3,970 B in 1s (5,139 B/s)               
-Selecting previously unselected package apt-transport-https.
-(Reading database ... 87290 files and directories currently installed.)
-Preparing to unpack .../apt-transport-https_2.8.3_all.deb ...
-Unpacking apt-transport-https (2.8.3) ...
-Setting up apt-transport-https (2.8.3) ...
-Scanning processes...                                                                                                                                                                                           
-Scanning linux images...                                                                                                                                                                                        
-
-Running kernel seems to be up-to-date.
-
-No services need to be restarted.
-
-No containers need to be restarted.
-
-No user sessions are running outdated binaries.
-
-No VM guests are running outdated hypervisor (qemu) binaries on this host.
-randark@elastic-server:~$ echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/9.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-9.x.list
-deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/9.x/apt stable main
-```
-
-在添加了 Elastic APT 仓库之后
-
-```shell
-randark@elastic-server:~$ sudo apt-get update && sudo apt-get install elasticsearch
-Hit:1 http://cn.archive.ubuntu.com/ubuntu noble InRelease
-Hit:2 https://artifacts.elastic.co/packages/9.x/apt stable InRelease
-Get:3 http://cn.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
-Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
-Hit:5 http://cn.archive.ubuntu.com/ubuntu noble-backports InRelease
-Fetched 126 kB in 2s (81.8 kB/s)
-Reading package lists... Done
-N: Missing Signed-By in the sources.list(5) entry for 'http://cn.archive.ubuntu.com/ubuntu'
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-The following NEW packages will be installed:
-  elasticsearch
-0 upgraded, 1 newly installed, 0 to remove and 28 not upgraded.
-Need to get 676 MB of archives.
-After this operation, 1,299 MB of additional disk space will be used.
-Get:1 https://artifacts.elastic.co/packages/9.x/apt stable/main amd64 elasticsearch amd64 9.1.5 [676 MB]
-Fetched 660 MB in 42s (15.7 MB/s)                                                                                                                                                                              
-Selecting previously unselected package elasticsearch.
-(Reading database ... 87294 files and directories currently installed.)
-Preparing to unpack .../elasticsearch_9.1.5_amd64.deb ...
-Creating elasticsearch group... OK
-Creating elasticsearch user... OK
-Unpacking elasticsearch (9.1.5) ...
-Setting up elasticsearch (9.1.5) ...
+```plaintext
 --------------------------- Security autoconfiguration information ------------------------------
 
 Authentication and authorization are enabled.
 TLS for the transport and HTTP layers is enabled and configured.
 
-The generated password for the elastic built-in superuser is : e5v39XvVWLyCUdOwGWSV
+The generated password for the elastic built-in superuser is : BPhrFCKVYI19oksc1igb
 
 If this node should join an existing cluster, you can reconfigure this with
 '/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token <token-here>'
@@ -142,119 +90,200 @@ Generate an enrollment token for Elasticsearch nodes with
  sudo systemctl enable elasticsearch.service
 ### You can start elasticsearch service by executing
  sudo systemctl start elasticsearch.service
-Scanning processes...                                                                                                                                                                                           
-Scanning linux images...                                                                                                                                                                                        
-
-Running kernel seems to be up-to-date.
-
-No services need to be restarted.
-
-No containers need to be restarted.
-
-No user sessions are running outdated binaries.
-
-No VM guests are running outdated hypervisor (qemu) binaries on this host.
 ```
 
-## 配置 Elasticsearch
+:::warning
 
-编辑 `/etc/elasticsearch/elasticsearch.yml` 文件，在其末尾加上
-
-```yml
-cluster.name: randark-elk
-node.name: elk-1
-network.host: 0.0.0.0
-discovery.type: single-node
-```
-
-:::note
-
-上述 yml 文件中，参数 `cluster.name` 和 `node.name` 可以按需更改
-
-参数 `cluster.initial_master_nodes` 需要被注释，是因为需要的是单机部署
-
-```yml
-cluster.initial_master_nodes: ["elastic-server"]
-```
+需要妥善保存以上信息，尤其是默认的 elastic 超级用户的密码
 
 :::
 
-## 配置 Elasticsearch 服务
+本文章配置的是测试用的单机节点，所以不需要进一步修改，但是如果需要部署多节点集群的话，需要按照 [Install Elasticsearch with a Debian package | Elastic Docs - Step 3: Set up the node for connectivity](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-with-debian-package#step-3-set-up-the-node-for-connectivity) 中的说明，修改对应参数
+
+## 启动 Elasticsearch 服务
 
 ```shell
-$ sudo systemctl daemon-reload
-$ sudo systemctl enable elasticsearch.service
-Created symlink /etc/systemd/system/multi-user.target.wants/elasticsearch.service → /usr/lib/systemd/system/elasticsearch.service.
+sudo systemctl daemon-reload
+sudo systemctl enable elasticsearch.service
+sudo systemctl start elasticsearch.service
 ```
 
-启动服务后，查看状态
+当服务启动完毕之后，测试服务
 
 ```shell
-$ sudo systemctl start elasticsearch.service
-$ sudo systemctl status elasticsearch.service
+curl -k -u elastic:BPhrFCKVYI19oksc1igb https://localhost:9200/
 ```
 
-理论上应当看到
+:::warning
+
+这里使用的密码，就是安装之后，在提示信息中显示的初始密码
+
+:::
+
+没有问题的话，应当能够看到
+
+```json title="curl -k -u elastic:BPhrFCKVYI19oksc1igb https://localhost:9200/"
+{
+    "name" : "elastic-server",
+    "cluster_name" : "elasticsearch",
+    "cluster_uuid" : "MxT9jeipSSe_vc1EPQq2yg",
+    "version" : {
+        "number" : "9.1.5",
+        "build_flavor" : "default",
+        "build_type" : "deb",
+        "build_hash" : "90ee222e7e0136dd8ddbb34015538f3a00c129b7",
+        "build_date" : "2025-10-02T22:07:12.966975992Z",
+        "build_snapshot" : false,
+        "lucene_version" : "10.2.2",
+        "minimum_wire_compatibility_version" : "8.19.0",
+        "minimum_index_compatibility_version" : "8.0.0"
+    },
+    "tagline" : "You Know, for Search"
+}
+```
+
+## 安装 Kibana
+
+执行
 
 ```shell
-randark@elastic-server:~$ sudo systemctl status elasticsearch.service
-● elasticsearch.service - Elasticsearch
-     Loaded: loaded (/usr/lib/systemd/system/elasticsearch.service; enabled; preset: enabled)
-     Active: active (running) since Tue 2025-10-21 13:28:30 UTC; 11s ago
-       Docs: https://www.elastic.co
-   Main PID: 3668 (java)
-      Tasks: 80 (limit: 9379)
-     Memory: 4.3G (peak: 4.3G)
-        CPU: 1min 51.225s
-     CGroup: /system.slice/elasticsearch.service
-             ├─3668 /usr/share/elasticsearch/jdk/bin/java -Xms4m -Xmx64m -XX:+UseSerialGC -Dcli.name=server -Dcli.script=/usr/share/elasticsearch/bin/elasticsearch -Dcli.libs=lib/tools/server-cli -Des.path.h>
-             ├─3732 /usr/share/elasticsearch/jdk/bin/java -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 >
-             └─3755 /usr/share/elasticsearch/modules/x-pack-ml/platform/linux-x86_64/bin/controller
-
-Oct 21 13:27:23 elastic-server systemd[1]: Starting elasticsearch.service - Elasticsearch...
-Oct 21 13:28:30 elastic-server systemd[1]: Started elasticsearch.service - Elasticsearch.
+sudo apt-get update && sudo apt-get install kibana
 ```
 
-## 安装 Kibana 并配置
-
-```shell
-sudo apt install kibana
-```
-
-然后编辑 `/etc/kibana/kibana.yml` 配置文件
+为了让外部网络可以访问 Kibana 需要更改 `/etc/kibana/kibana.yml` 文件，在其中编辑
 
 ```yml
-server.port: 5601
 server.host: 0.0.0.0
-server.name: randark-kibana
 ```
 
-随后启动服务，应当能够看到
+由于是单机测试集群，可以直接启动 Kibana
 
 ```shell
-randark@elastic-server:~$ sudo systemctl start kibana
-randark@elastic-server:~$ sudo systemctl status kibana
-● kibana.service - Kibana
-     Loaded: loaded (/usr/lib/systemd/system/kibana.service; disabled; preset: enabled)
-     Active: active (running) since Tue 2025-10-21 13:58:01 UTC; 4s ago
-       Docs: https://www.elastic.co
-   Main PID: 5111 (node)
-      Tasks: 11 (limit: 9379)
-     Memory: 152.1M (peak: 152.4M)
-        CPU: 5.192s
-     CGroup: /system.slice/kibana.service
-             └─5111 /usr/share/kibana/bin/../node/glibc-217/bin/node /usr/share/kibana/bin/../src/cli/dist
-
-Oct 21 13:58:01 elastic-server systemd[1]: Started kibana.service - Kibana.
-Oct 21 13:58:04 elastic-server kibana[5111]: {"log.level":"info","@timestamp":"2025-10-21T13:58:04.156Z","log.logger":"elastic-apm-node","ecs.version":"8.10.0","agentVersion":"4.13.0","env":{"pid":5111,"proc>
-Oct 21 13:58:04 elastic-server kibana[5111]: Native global console methods have been overridden in production environment.
+sudo systemctl daemon-reload
+sudo systemctl enable kibana.service
+sudo systemctl start kibana.service
 ```
 
-这个时候访问 5601 端口，应该能够看到
+稍等片刻，访问 `http://192.168.200.200:5601/` 应当能够看到
 
-![img](img/image_20251000-220040.png)
+![img](img/image_20251011-211106.png)
 
-## 为 Kibana 生成加密 key
+## 连接 Kibana 与 Elasticsearch
+
+看到 Kibana 初始化界面之后，根据引导，执行
+
+```shell
+sudo /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token --scope kibana
+```
+
+服务没有问题的话，应当能够看到类似
+
+```shell
+randark@elastic-server:~$ sudo /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token --scope kibana
+eyJ2ZXIiOiI4LjE0LjAiLCJhZHIiOlsiMTkyLjE2OC4yMDAuMjAwOjkyMDAiXSwiZmdyIjoiZmE0NWZkNWU0OTg1MzY1MjkzYjU1Yjc2MWViZDkzYjZjM2M3NDYzMTEyMzE0NDFiMjc0NzY4ZmI0MWRmMmY3NyIsImtleSI6Ikw3NE5ESm9COWU5b1EtRWJPRkZnOi1QOWNLT2hVZ2diTWZvdTcwQVZxcWcifQ==
+```
+
+将获得的 token 输入，应当能够看到
+
+![img](img/image_20251013-211355.png)
+
+执行 `sudo /usr/share/kibana/bin/kibana-verification-code` 就能得到验证码
+
+输入之后，即可进入自动配置阶段
+
+![img](img/image_20251015-211531.png)
+
+待自动化配置成功之后，即可看到
+
+![img](img/image_20251017-211701.png)
+
+输入先前使用的 Elastic 超级用户的凭据，即可访问 Kibana
+
+![img](img/image_20251017-211754.png)
+
+## 破解 Elasticsearch
+
+使用项目 [Qwermit/ELKrack: Elasticsearch crack 7.X-9.X](https://github.com/Qwermit/ELKrack)
+
+执行
+
+```shell
+git clone https://github.com/Qwermit/ELKrack
+cd ELKrack/
+chmod +x build_crack_jar.sh
+```
+
+然后根据对应的版本号，设置环境变量后执行 `build_crack_jar.sh` 文件
+
+```shell
+# 查看版本信息
+curl -fsSL -k -u elastic:BPhrFCKVYI19oksc1igb https://localhost:9200/ | grep number
+# 设定版本环境变量
+export VERSION=9.1.5
+# 停止服务
+sudo systemctl stop elasticsearch.service
+sudo systemctl stop kibana.service
+# 执行
+./build_crack_jar.sh
+```
+
+执行完毕后，复制 patch 之后的文件
+
+```shell
+sudo cp /usr/share/elasticsearch/modules/x-pack-core/x-pack-core-9.1.5.jar /usr/share/elasticsearch/modules/x-pack-core/x-pack-core-9.1.5.jar.bak
+sudo cp ./output/x-pack-core-9.1.5.crack.jar /usr/share/elasticsearch/modules/x-pack-core/x-pack-core-9.1.5.jar
+```
+
+重启服务
+
+```shell
+sudo systemctl restart elasticsearch.service
+sudo systemctl restart kibana.service
+```
+
+继续访问 `http://192.168.200.200:5601/` 应当能够看到
+
+![img](img/image_20251031-213133.png)
+
+左上角，进入 space 设置
+
+![img](img/image_20251032-213235.png)
+
+进入许可证管理
+
+![img](img/image_20251033-213311.png)
+
+![img](img/image_20251033-213348.png)
+
+在 `Update your license` 选项中，上传在 [Qwermit/ELKrack: Elasticsearch crack 7.X-9.X](https://github.com/Qwermit/ELKrack) 项目的 `licenses` 文件夹中的许可文件，两个都可以，但是更建议使用 `platinum_license.json` 以获得完整 Elastic 能力
+
+操作没有问题的话，上传之后应该能够看到
+
+![img](img/image_20251041-214145.png)
+
+## 部署 Fleet 服务器
+
+如果需要部署 Elastic Agent 与端点进行通信的话，需要使用 Fleet 进行统一管理与通信
+
+访问侧边栏的 `Fleet` 选项
+
+![img](img/image_20251043-214324.png)
+
+正常情况下，会看到
+
+```plaintext
+Agent binary source needs encrypted saved object api key to be set
+```
+
+![img](img/image_20251043-214353.png)
+
+这个时候需要从命令行中生成 `encrypted saved object api key`
+
+```shell
+sudo /usr/share/kibana/bin/kibana-encryption-keys generate
+```
+
+理想情况下，能够看到
 
 ```shell
 randark@elastic-server:~$ sudo /usr/share/kibana/bin/kibana-encryption-keys generate
@@ -279,13 +308,29 @@ Already defined settings are ignored and can be regenerated using the --force fl
 Definitions should be set in the kibana.yml used configure Kibana.
 
 Settings:
-xpack.encryptedSavedObjects.encryptionKey: a99322106d2964fbc48666f98562a6aa
-xpack.reporting.encryptionKey: f7b5d56daa013b43d42eef9c93cdfb7c
-xpack.security.encryptionKey: 5814a2f69914478b0260255564e18f49
+xpack.encryptedSavedObjects.encryptionKey: 23a8bab7d7b2bf66385ac8b4301b48cf
+xpack.reporting.encryptionKey: d75d9b71d5e3fa7822c96ffe3d7d8315
+xpack.security.encryptionKey: 879e92fcfa0782faa40fb0c10f4d7c82
 ```
 
-随后的配置在 `5601` webui 中进行配置
+将下方三行配置参数复制到 `/etc/kibana/kibana.yml` 文件的末尾
 
-## Reference
+然后重启 Kibana 服务
 
-[Security：如何安装 Elastic SIEM 和 EDR_elastic edr-CSDN博客](https://blog.csdn.net/UbuntuTouch/article/details/114023944)
+```shell
+sudo systemctl restart kibana.service
+```
+
+随后就可以正常部署 Fleet 服务器
+
+![img](img/image_20251048-214847.png)
+
+由于是单机测试服务，所以直接将 FLeet 与 Elasticsearch 和 Kibana 部署在同一台服务器上
+
+![img](img/image_20251051-215129.png)
+
+根据指引进行安装即可，成功的话应该能够看到
+
+![img](img/image_20251057-215704.png)
+
+至此，Elastic SIEM 基础设施部署完毕

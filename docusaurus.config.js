@@ -193,7 +193,7 @@ const config = {
         },
         prism: {
             theme: prismThemes.dracula,
-            additionalLanguages: ['powershell', 'php', 'ini', 'bash', 'docker'],
+            additionalLanguages: ['powershell', 'php', 'ini', 'bash', 'json', 'docker'],
         },
         docs: {
             sidebar: {
