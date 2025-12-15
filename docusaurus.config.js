@@ -107,6 +107,12 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
+                    sidebarId: 'CheatSheet_Sidebar',
+                    position: 'left',
+                    label: 'CheatSheet',
+                },
+                {
+                    type: 'docSidebar',
                     sidebarId: 'CTF_Sidebar',
                     position: 'left',
                     label: 'CTF研究',
