@@ -89,9 +89,15 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
-                    sidebarId: 'Forensic_Sidebar',
+                    sidebarId: 'AttackDefense_Sidebar',
                     position: 'left',
-                    label: '电子取证',
+                    label: '红蓝攻防',
+                },
+                {
+                    type: 'docSidebar',
+                    sidebarId: 'Compliance_Sidebar',
+                    position: 'left',
+                    label: '合规与基线',
                 },
                 {
                     type: 'docSidebar',
