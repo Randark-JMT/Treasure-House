@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunktreasure_house=globalThis.webpackChunktreasure_house||[]).push([[8121],{68070:e=>{e.exports=JSON.parse('{"tags":[{"label":"AI","permalink":"/blog/tags/ai","count":1},{"label":"Docker","permalink":"/blog/tags/docker","count":2},{"label":"Memory-Forensic","permalink":"/blog/tags/memory-forensic","count":2}]}')}}]);
