@@ -1,5 +1,5 @@
 ---
-slug: 2025-10-02-VIper-Docker-Image-Analysis
+slug: 2026-04-03-VIper-Docker-Image-Analysis
 title: Viper Docker 镜像分析
 authors: Randark
 tags: [Docker]
@@ -8,6 +8,13 @@ tags: [Docker]
 Viper 在刚出来的那段时间可谓是炙手可热的项目，极大降低了 Metasploit 框架的使用难度，但是在 2025 年的今天，随着热度下降，以及 Viper 项目进入收费机制，项目已经完全变味，热度也大大下降
 
 <!-- truncate -->
+
+:::info 更新历史
+
+v1: 2025.10.02 第一版文章
+v2: 2026.04.03 更新 Viper 破解过程
+
+:::
 
 :::info
 
@@ -354,7 +361,7 @@ FROM registry.cn-shenzhen.aliyuncs.com/toys/viper-base:latest
 
 ### Viper 镜像性能分析
 
-算了后面想想就不分析了，把 Elastic Search，Redis，Mysql，Python，Metasploit全部塞在一个容器，美名其曰方便部署，能有什么性能可言
+算了后面想想就不分析了，把 Elastic Search，Redis，Mysql，Python，Metasploit 全部塞在一个容器，美名其曰方便部署，能有什么性能可言
 
 ## 绕过收费限制
 
@@ -365,10 +372,325 @@ FROM registry.cn-shenzhen.aliyuncs.com/toys/viper-base:latest
 - `/WebSocket/Handle/heartbeat.py` - 在定时循环的心跳包中，确认许可状态
 - `/Core/Handle/license.py` - 输入许可证确认许可证状态
 
-那么对这两个函数的逻辑进行针对性修改即可，这里给出两个思路
+对代码进行进一步审计分析之后，可以发现 `/Core/Handle/license.py` 代码并没有被其他文件所引用，也就意味着实际上起作用的是 `/WebSocket/Handle/heartbeat.py` 文件中的代码
 
-1. 直接根据源码，修改对应文件之后，覆盖镜像即可
-2. 劫持 viper 容器向 `https://license.viperrtp.com/api/v1/license` 发起的请求
+对代码进行分析，可以发现激活过程是向 `https://api.viperrtp.com/api/v1/license` 发起请求，那么可以直接提取源代码之后，将原有的 `heartbeat.cpython-312-x86_64-linux-gnu.so` 模块替换掉即可
+
+这里给出 patch 过后的代码
+
+<details>
+
+<summary> Patched heartbeat.py </summary>
+
+```python
+# -*- coding: utf-8 -*-
+# @File  : heartbeat.py
+# @Date  : 2021/2/27
+# @Desc  :
+import re
+import time
+
+import requests
+
+from Core.Handle.host import Host
+from Lib.aescrypt import load_public_key, encrypt_with_public_key, save_dict_to_file_binary, delete_license_file, verify_signature
+from Lib.customexception import CustomException
+from Lib.log import logger
+from Lib.notice import Notice
+from Lib.timeapi import TimeAPI
+from Lib.xcache import Xcache
+from Msgrpc.Handle.handler import Handler
+from Msgrpc.Handle.job import Job
+from Msgrpc.Handle.session import Session
+from PostModule.Handle.postmoduleconfig import PostModuleConfig
+from PostModule.Handle.postmoduleresulthistory import PostModuleResultHistory
+
+ERROR_CODE = 400
+
+
+class HeartBeat(object):
+    check_point = 3
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def first_heartbeat_result():
+        hosts_sorted, network_data = Host.list_hostandsession()
+
+        result_history = PostModuleResultHistory.list_all()
+
+        Xcache.set_heartbeat_cache_result_history(result_history)
+
+        notices = Notice.list_notices()
+
+        jobs = Job.list_jobs()
+
+        bot_wait_list = Job.list_bot_wait()
+
+        # 任务队列长度
+        task_queue_length = Xcache.get_module_task_length()
+        module_options = PostModuleConfig.list_dynamic_option()
+        result = {
+            'hosts_sorted_update': True,
+            'hosts_sorted': hosts_sorted,
+            'network_data_update': True,
+            'network_data': network_data,
+            'result_history_update': True,
+            'result_history': result_history,
+            'notices_update': True,
+            'notices': notices,
+            'task_queue_length': task_queue_length,
+            'jobs_update': True,
+            'jobs': jobs,
+            'bot_wait_list_update': True,
+            'bot_wait_list': bot_wait_list,
+            'module_options_update': True,
+            'module_options': module_options,
+        }
+        client = HeartBeatAPI()
+        client.v_heartbeat(hosts_sorted)
+        return result
+
+    @staticmethod
+    def get_heartbeat_result():
+        result = {}
+
+        # jobs 列表 首先执行,刷新数据,删除过期任务
+        jobs = Job.list_jobs()
+        cache_jobs = Xcache.get_heartbeat_cache_jobs()
+        if cache_jobs == jobs:
+            result["jobs_update"] = False
+            result["jobs"] = []
+        else:
+            Xcache.set_heartbeat_cache_jobs(jobs)
+            result["jobs_update"] = True
+            result["jobs"] = jobs
+
+        # hosts_sorted,network_data
+        hosts_sorted, network_data = Host.list_hostandsession()
+
+        cache_hosts_sorted = Xcache.get_heartbeat_cache_hosts_sorted()
+        if cache_hosts_sorted == hosts_sorted:
+            result["hosts_sorted_update"] = False
+            result["hosts_sorted"] = []
+        else:
+            Xcache.set_heartbeat_cache_hosts_sorted(hosts_sorted)
+            result["hosts_sorted_update"] = True
+            result["hosts_sorted"] = hosts_sorted
+
+        cache_network_data = Xcache.get_heartbeat_cache_network_data()
+        if cache_network_data == network_data:
+            result["network_data_update"] = False
+            result["network_data"] = {"nodes": [], "edges": []}
+        else:
+            Xcache.set_heartbeat_cache_network_data(network_data)
+            result["network_data_update"] = True
+            result["network_data"] = network_data
+
+        # result_history
+        result_history = PostModuleResultHistory.list_all()
+
+        cache_result_history = Xcache.get_heartbeat_cache_result_history()
+
+        if cache_result_history == result_history:
+            result["result_history_update"] = False
+            result["result_history"] = []
+        else:
+            Xcache.set_heartbeat_cache_result_history(result_history)
+            result["result_history_update"] = True
+            result["result_history"] = result_history
+
+        # notices
+        notices = Notice.list_notices()
+        cache_notices = Xcache.get_heartbeat_cache_notices()
+        if cache_notices == notices:
+            result["notices_update"] = False
+            result["notices"] = []
+        else:
+            Xcache.set_heartbeat_cache_notices(notices)
+            result["notices_update"] = True
+            result["notices"] = notices
+
+        # 任务队列长度
+        task_queue_length = Xcache.get_module_task_length()
+        result["task_queue_length"] = task_queue_length
+
+        # bot_wait_list 列表
+        bot_wait_list = Job.list_bot_wait()
+        cache_bot_wait_list = Xcache.get_heartbeat_cache_bot_wait_list()
+        if cache_bot_wait_list == bot_wait_list:
+            result["bot_wait_list_update"] = False
+            result["bot_wait_list"] = []
+        else:
+            Xcache.set_heartbeat_cache_bot_wait_list(bot_wait_list)
+            result["bot_wait_list_update"] = True
+            result["bot_wait_list"] = bot_wait_list
+
+        # module_options 列表
+        module_options = PostModuleConfig.list_dynamic_option()
+        cache_module_options = Xcache.get_heartbeat_cache_module_options()
+        if cache_module_options == module_options:
+            result["module_options_update"] = False
+            result["module_options"] = []
+        else:
+            Xcache.set_heartbeat_cache_module_options(module_options)
+            result["module_options_update"] = True
+            result["module_options"] = module_options
+
+        client = HeartBeatAPI()
+        client.v_heartbeat(hosts_sorted)
+
+        return result
+
+
+return_code = 200
+error_count = 0
+run_code = 0
+
+
+class HeartBeatAPI(object):
+    def __init__(self):
+        self.base_url = "https://api.viperrtp.com/api/v1/license"
+        self.instance_status = None
+        self.instance_id = None
+        self.instance_created_at = None
+        self.instance_name = None
+        self.instance_object = None
+        self.key = None
+        self.activation = 0
+        self.activation_limit = 0
+        self.license_created_at = None
+        self.license_expires_at = None
+        self.license_id = None
+
+        self.license_mode = None
+        self.license_status = None
+
+    def check_heartbeat_format(self):
+        """Validate the license key format"""
+        if not self.key:
+            return False
+        pattern = r'^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$'
+        return bool(re.match(pattern, self.key))
+
+    def init_from_conf(self):
+        """Initialize license information from configuration"""
+        conf = Xcache.get_license_conf()
+        self.key = conf.get("key")
+        self.activation = conf.get("activation")
+        self.activation_limit = conf.get("activation_limit")
+        self.license_created_at = conf.get("license_created_at")
+        self.license_expires_at = conf.get("license_expires_at")
+        self.license_id = conf.get("license_id")
+        self.license_mode = conf.get("license_mode")
+        self.license_status = conf.get("license_status")
+        self.instance_created_at = conf.get("instance_created_at")
+        self.instance_id = conf.get("instance_id")
+        self.instance_name = conf.get("instance_name")
+        self.instance_object = conf.get("instance_object")
+        self.instance_status = conf.get("instance_status")
+
+    # active
+    def a_heartbeat(self):
+        """Verify the license key with the backend (mocked, always activated)"""
+        # 模拟激活成功的返回
+        now = int(time.time())
+        result = {
+            "key": self.key or "ABCDE-ABCDE-ABCDE-ABCDE-ABCDE",
+            "activation": 1,
+            "activation_limit": 999,
+            "license_created_at": now - 86400 * 10,
+            "license_expires_at": now + 86400 * 365,
+            "license_id": "mock_license_id",
+            "license_mode": "pro",
+            "license_status": "active",
+            "instance_created_at": now - 86400 * 10,
+            "instance_id": "mock_instance_id",
+            "instance_name": self.instance_name or "mock_instance",
+            "instance_object": "mock_object",
+            "instance_status": "active",
+        }
+        self.activation = result["activation"]
+        self.activation_limit = result["activation_limit"]
+        self.license_created_at = result["license_created_at"]
+        self.license_expires_at = result["license_expires_at"]
+        self.license_id = result["license_id"]
+        self.license_mode = result["license_mode"]
+        self.license_status = result["license_status"]
+        self.instance_created_at = result["instance_created_at"]
+        self.instance_id = result["instance_id"]
+        self.instance_object = result["instance_object"]
+        self.instance_status = result["instance_status"]
+        Xcache.set_license_conf(result)
+        save_dict_to_file_binary(result)
+        return result
+
+    def d_heartbeat(self):
+        """Deactivate the license for a specific instance (mocked)"""
+        # 模拟注销成功
+        Xcache.set_license_conf(None)
+        delete_license_file()
+        return True
+
+    def clean_action(self, hosts_sorted):
+        handler_list = Xcache.get_cache_handlers()
+        sessions = []
+        for host in hosts_sorted:
+            for session in host.get("session"):
+                sessions.append(session)
+        count = len([400, 200])
+        for session in sessions[count:]:
+            Session.destroy(session.get("id"))
+
+        for handler in handler_list[count:]:
+            Handler.destroy(handler.get("ID"))
+        Notice.send_warning(
+            f"许可证限制:清理Session及监听",
+            f"License limit: Clean Session and Handler"
+        )
+
+    def clean_action_2(self, hosts_sorted):
+        global run_code
+        if 30 * 60 > run_code > 0:
+            return
+        run_code = 0
+        for host in hosts_sorted:
+            for session in host.get("session"):
+                Session.destroy(session.get("id"))
+        Notice.send_warning(
+            f"许可证限制:Session运行时长",
+            f"License limit: Session run time"
+        )
+
+    def v_heartbeat(self, hosts_sorted):
+        """Validate the license with the backend (mocked, always activated)"""
+        # 直接返回已激活状态
+        return True
+```
+
+</details>
+
+将上述文件保存为 `heartbeat_cracked.py` 文件之后，可以直接利用 Docker Layers 机制，对原有镜像进行 patch
+
+```dockerfile
+FROM viperplatform/viper:latest
+
+# config gcc
+RUN apt-get update && apt-get install -y build-essential python3.12-dev
+
+RUN rm /root/viper/WebSocket/Handle/heartbeat.cpython-312-x86_64-linux-gnu.so
+COPY ./heartbeat_cracked.py /root/viper/WebSocket/Handle/heartbeat.py
+COPY ./setup.py /root/viper/WebSocket/Handle/setup.py
+
+RUN cd /root/viper/WebSocket/Handle && /usr/bin/python3.12 setup.py build_ext --inplace && \
+    rm -rf /root/viper/WebSocket/Handle/build /root/viper/WebSocket/Handle/setup.py && \
+    rm -rf /root/viper/WebSocket/Handle/heartbeat.py /root/viper/WebSocket/Handle/heartbeat.c
+```
+
+生成的新镜像，随便输入一份符合格式的，例如 `ABCDE-ABCDE-ABCDE-ABCDEABCDE` 作为激活码, 即可激活无限制的专业版 Viper
+
+![img](img/image_20260454-215406.png)
 
 ## 镜像安全分析
 
