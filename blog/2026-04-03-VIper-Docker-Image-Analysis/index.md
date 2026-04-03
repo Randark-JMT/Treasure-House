@@ -671,7 +671,26 @@ class HeartBeatAPI(object):
 
 </details>
 
-将上述文件保存为 `heartbeat_cracked.py` 文件之后，可以直接利用 Docker Layers 机制，对原有镜像进行 patch
+将上述文件保存为 `heartbeat_cracked.py` 文件之后，还有一份 `setup.py`
+
+```python
+from setuptools import setup
+from Cython.Build import cythonize
+
+py_files = ["heartbeat.py"] 
+
+setup(
+    ext_modules=cythonize(
+        py_files,
+        compiler_directives={
+            'language_level': "3",
+        },
+        nthreads=4
+    )
+)
+```
+
+可以直接利用 Docker Layers 机制，对原有镜像进行 patch
 
 ```dockerfile
 FROM viperplatform/viper:latest
