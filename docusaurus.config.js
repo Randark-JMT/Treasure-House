@@ -49,6 +49,8 @@ const config = {
                     // Remove this to remove the "edit this page" links.
                     editUrl:
                         'https://github.com/Randark-JMT/Treasure-House/edit/main/',
+                    postsPerPage: 'ALL',
+                    blogSidebarCount: 'ALL',
                 },
                 theme: {
                     customCss: require.resolve('./src/css/custom.css'),
