@@ -91,12 +91,6 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
-                    sidebarId: 'AttackDefense_Sidebar',
-                    position: 'left',
-                    label: '红蓝攻防',
-                },
-                {
-                    type: 'docSidebar',
                     sidebarId: 'Compliance_Sidebar',
                     position: 'left',
                     label: '合规与基线',
