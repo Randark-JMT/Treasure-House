@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunktreasure_house=globalThis.webpackChunktreasure_house||[]).push([[8947],{56600:e=>{e.exports=JSON.parse('{"authors":[{"name":"\u9648\u6a58\u58a8","title":"Why So Serious?","url":"https://randark.site","imageURL":"https://randark.site/img/logo.jpg","key":"Randark","page":null,"count":8}]}')}}]);
