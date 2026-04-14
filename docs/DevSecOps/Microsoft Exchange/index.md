@@ -2,7 +2,7 @@
 
 ## Virtual Directory
 
-在 Exchange 中，Virtual Directory 是指在 IIS 中为 Exchange 服务创建的虚拟目录。它们用于处理不同类型的客户端请求，例如 OWA（Outlook Web Access）、ECP（Exchange Control Panel）等。每个虚拟目录都有特定的 URL 路径和配置，用于提供相应的服务。
+在 Exchange 中，Virtual Directory 是指在 IIS 中为 Exchange 服务创建的虚拟目录。它们用于处理不同类型的客户端请求，例如 OWA (Outlook Web Access)、ECP (Exchange Control Panel) 等。每个虚拟目录都有特定的 URL 路径和配置，用于提供相应的服务。
 
 Exchange 总共有八大虚拟目录：
 

@@ -12,9 +12,9 @@
 
 Exchage 的虚拟路由，其基本文件存放于 `C:\Program Files\Microsoft\Exchange Server\V15\FrontEnd\HttpProxy` 目录下，此目录存放了各个虚拟目录的相关文件，例如 ECP、EWS、MAPI、OAB、OWA、EAS 和 PowerShell 等。
 
-而用户界面，也就是`owa`目录，位于`C:\Program Files\Microsoft\Exchange Server\V15\FrontEnd\HttpProxy\owa`目录下。攻击者可能会通过修改该目录下的文件来植入恶意代码，从而在用户访问 OWA 时执行恶意操作。
+而用户界面，也就是 `owa` 目录，位于 `C:\Program Files\Microsoft\Exchange Server\V15\FrontEnd\HttpProxy\owa` 目录下。攻击者可能会通过修改该目录下的文件来植入恶意代码，从而在用户访问 OWA 时执行恶意操作。
 
-最为常见的操作，就是对`owa`目录下的`.\auth\<version>\scripts\premium\flogon.js`文件进行篡改，根本原因，就是因为登录按钮所绑定的`clkLgn`函数位于该文件中。
+最为常见的操作，就是对 `owa` 目录下的 `.\auth\<version>\scripts\premium\flogon.js` 文件进行篡改，根本原因，就是因为登录按钮所绑定的 `clkLgn` 函数位于该文件中。
 
 ```javascript
 function clkLgn()
