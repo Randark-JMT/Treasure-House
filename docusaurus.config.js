@@ -115,6 +115,12 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
+                    sidebarId: 'OSINT_Sidebar',
+                    position: 'left',
+                    label: 'OSINT',
+                },
+                {
+                    type: 'docSidebar',
                     sidebarId: 'CTF_Sidebar',
                     position: 'left',
                     label: 'CTF研究',
