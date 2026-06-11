@@ -53,6 +53,8 @@ const config = {
                     // Remove this to remove the "edit this page" links.
                     editUrl:
                         'https://github.com/Randark-JMT/Treasure-House/edit/main/',
+                    remarkPlugins: [remarkMath],
+                    rehypePlugins: [rehypeKatex],
                     postsPerPage: 'ALL',
                     blogSidebarCount: 'ALL',
                 },
