@@ -9,6 +9,8 @@ tags: [AI]
 
 <!-- truncate -->
 
+快进一下，直接给出最终输出的研究报告 [report.md](./report.md)
+
 ## Stage Alpha: 架构探索
 
 ```plaintext
