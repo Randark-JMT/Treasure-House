@@ -1,0 +1,74 @@
+name: 'VPS SSH Setup'
+description: '配置部署专用 SSH 私钥与固定 host key，并导出可复用的 ssh 选项'
+
+inputs:
+  private_key:
+    description: 'VPS_DEPLOY_SSH_KEY 内容'
+    required: true
+  known_hosts:
+    description: 'VPS_SSH_KNOWN_HOSTS 内容（固定 host key，禁止 StrictHostKeyChecking=no）'
+    required: true
+  host:
+    description: 'ECS 公网 IP 或主机名'
+    required: true
+  port:
+    description: 'SSH 端口'
+    required: false
+    default: '22'
+  user:
+    description: '部署账号'
+    required: false
+    default: 'treasure-deploy'
+  key_alias:
+    description: 'known_hosts 中使用的 HostKeyAlias'
+    required: false
+    default: 'treasure-house-deploy'
+
+outputs:
+  ssh_opts:
+    description: '公共 ssh 参数'
+    value: ${{ steps.opts.outputs.ssh_opts }}
+  ssh_cmd:
+    description: 'ssh 可执行前缀（含 -i/-p/选项）'
+    value: ${{ steps.opts.outputs.ssh_cmd }}
+  dest:
+    description: 'user@host'
+    value: ${{ steps.opts.outputs.dest }}
+
+runs:
+  using: composite
+  steps:
+    - name: Write credentials
+      shell: bash
+      env:
+        INPUT_KEY: ${{ inputs.private_key }}
+        INPUT_KNOWN: ${{ inputs.known_hosts }}
+      run: |
+        set -euo pipefail
+        [ -n "$INPUT_KEY" ]   || { echo "::error::secrets.VPS_DEPLOY_SSH_KEY 为空"; exit 1; }
+        [ -n "$INPUT_KNOWN" ] || { echo "::error::vars.VPS_SSH_KNOWN_HOSTS 为空。禁止改用 StrictHostKeyChecking=no —— 部署通道必须固定服务器 host key。"; exit 1; }
+        mkdir -p ~/.ssh && chmod 700 ~/.ssh
+        printf '%s\n' "$INPUT_KEY" > ~/.ssh/id_deploy
+        chmod 600 ~/.ssh/id_deploy
+        printf '%s\n' "$INPUT_KNOWN" > ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+        ssh-keygen -lf ~/.ssh/known_hosts
+
+    - name: Build ssh options
+      id: opts
+      shell: bash
+      env:
+        VPS_HOST: ${{ inputs.host }}
+        VPS_PORT: ${{ inputs.port }}
+        VPS_USER: ${{ inputs.user }}
+        HOST_ALIAS: ${{ inputs.key_alias }}
+      run: |
+        set -euo pipefail
+        opts="-i $HOME/.ssh/id_deploy -p $VPS_PORT -o BatchMode=yes -o IdentitiesOnly=yes"
+        opts="$opts -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+        opts="$opts -o HostKeyAlias=$HOST_ALIAS"
+        opts="$opts -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4"
+        opts="$opts -o IPQoS=throughput"
+        echo "ssh_opts=$opts" >> "$GITHUB_OUTPUT"
+        echo "ssh_cmd=ssh $opts" >> "$GITHUB_OUTPUT"
+        echo "dest=$VPS_USER@$VPS_HOST" >> "$GITHUB_OUTPUT"

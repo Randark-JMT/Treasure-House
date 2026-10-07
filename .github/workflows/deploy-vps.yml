@@ -1,0 +1,226 @@
+name: Deploy to VPS
+
+# 构建在 GitHub runner 完成，产物经 rsync over SSH 推到境内 ECS，服务端做原子切流与冒烟。
+# 需要配置的 secrets / vars 见 deploy/DEPLOYMENT.md「控制面配置」。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 本次部署备注（写入部署摘要）
+        required: false
+        default: manual deploy
+
+# 同一时刻只允许一个部署；新的 push 排队而不是取消进行中任务，
+# 避免半程 rsync 被 kill 导致 incoming 与 release 不一致。
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & deploy treasure-house
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL }}
+
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_USER: ${{ vars.VPS_USER || 'treasure-deploy' }}
+      VPS_PORT: ${{ vars.VPS_SSH_PORT || '22' }}
+      VPS_PATH: ${{ vars.VPS_DEPLOY_PATH || '/var/www/html/treasure-house' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://treasure-house.randark.site' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 21
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build website
+        run: npm run build
+
+      - name: Pre-deploy gate
+        run: bash deploy/scripts/check-build.sh build
+
+      - name: Dependency audit (report only)
+        continue-on-error: true
+        run: |
+          {
+            echo "## npm audit（仅报告，不阻断）"
+            echo '```'
+            npm audit --omit=dev --audit-level=high 2>&1 | tail -n 30
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure SSH credentials
+        id: ssh
+        uses: ./.github/actions/vps-ssh-setup
+        with:
+          private_key: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          known_hosts: ${{ vars.VPS_SSH_KNOWN_HOSTS }}
+          host: ${{ vars.VPS_HOST }}
+          port: ${{ vars.VPS_SSH_PORT || '22' }}
+          user: ${{ vars.VPS_USER || 'treasure-deploy' }}
+          key_alias: ${{ vars.VPS_HOST_KEY_ALIAS || 'treasure-house-deploy' }}
+
+      - name: Preflight connectivity and disk
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2086
+          ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" 'bash -s' <<REMOTE
+          set -euo pipefail
+          command -v rsync >/dev/null || { echo "服务器缺少 rsync"; exit 1; }
+          [ -x "$VPS_PATH/activate-release.sh" ] || { echo "服务器缺少可执行的 activate-release.sh"; exit 1; }
+          [ -w "$VPS_PATH/incoming" ] || { echo "incoming 目录不可写"; exit 1; }
+          avail_mb=\$(df -Pm "$VPS_PATH" | awk 'NR==2 {print \$4}')
+          echo "可用空间: \${avail_mb}MB"
+          [ "\$avail_mb" -gt 300 ] || { echo "磁盘可用空间不足 300MB"; exit 1; }
+          echo "current=\$(basename "\$(readlink "$VPS_PATH/current" || echo none)")"
+          REMOTE
+
+      - name: Rsync build output (incremental, retry on flaky link)
+        run: |
+          set -euo pipefail
+          RSYNC_SSH="ssh ${{ steps.ssh.outputs.ssh_opts }}"
+          # --checksum    : CI 的 mtime 与服务器无关，按内容判定才有正确增量（增量才是弱网易恢复的前提）
+          # --partial-dir : 中断的半包放在独立目录，绝不把截断文件留在 incoming 里
+          # --delete      : 只作用于 incoming；线上 current 走符号链接切换，不受影响
+          RSYNC_OPTS=(--archive --delete --checksum --human-readable
+                      --partial-dir=.rsync-partial
+                      --compress --compress-level=6
+                      --skip-compress=gz/zip/pdf/jpg/jpeg/png/gif/webp/woff/woff2/mp4
+                      --timeout=120 --stats --out-format='%n (%i)')
+          ok=0
+          for attempt in 1 2 3; do
+            echo "=== rsync 第 $attempt 次尝试 ==="
+            if rsync "${RSYNC_OPTS[@]}" -e "$RSYNC_SSH" build/ "${{ steps.ssh.outputs.dest }}:$VPS_PATH/incoming/"; then
+              ok=1; break
+            fi
+            echo "第 $attempt 次失败，等待 $((attempt * 15))s 后重试"
+            sleep $((attempt * 15))
+          done
+          [ "$ok" = 1 ] || { echo "::error::rsync 连续 3 次失败，线上内容未被改动"; exit 1; }
+
+          local_count=$(find build -type f | wc -l)
+          # shellcheck disable=SC2086
+          remote_count=$(ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" \
+            "find '$VPS_PATH/incoming' -type f -not -path '$VPS_PATH/incoming/.rsync-partial/*' | wc -l")
+          echo "传输校验 local=$local_count remote=$remote_count"
+          [ "$local_count" = "$remote_count" ] || { echo "::error::文件数不一致，拒绝切流"; exit 1; }
+
+      - name: Atomic release switch + server-side smoke
+        id: release
+        env:
+          GIT_SHA: ${{ github.sha }}
+          GH_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          REL_ID="$(date -u +%Y%m%dT%H%M%SZ)-${GIT_SHA:0:8}"
+          echo "release_id=$REL_ID" >> "$GITHUB_OUTPUT"
+          remote_cmd="env BASE='$VPS_PATH' KEEP=5 MIN_FILES=300 GIT_SHA='$GIT_SHA' GH_RUN_URL='$GH_RUN_URL' bash '$VPS_PATH/activate-release.sh' '$REL_ID'"
+          # shellcheck disable=SC2086
+          ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" "$remote_cmd"
+
+      - name: External smoke test (from runner)
+        env:
+          SMOKE_IP: ${{ vars.VPS_PUBLIC_IP }}
+        run: |
+          set -euo pipefail
+          site_host=$(sed -E 's#https?://([^/:]+).*#\1#' <<<"$SITE_URL")
+          resolve=()
+          # 割接前 DNS 仍指向 GitHub Pages，用 --resolve 直连 ECS 验证真实内容；
+          # VPS_PUBLIC_IP 留空时走正常 DNS 解析。
+          if [ -n "$SMOKE_IP" ]; then
+            resolve=(--resolve "$site_host:443:$SMOKE_IP")
+            echo "冒烟目标 host=$site_host ip=$SMOKE_IP"
+          else
+            echo "冒烟目标 host=$site_host ip=DNS"
+          fi
+
+          check() {
+            local path="$1" code attempt
+            for attempt in 1 2 3; do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+                     "${resolve[@]}" "$SITE_URL$path" || echo 000)
+              [ "$code" = 200 ] && { echo "GET $path => HTTP $code"; return 0; }
+              echo "GET $path 返回 $code，第 $attempt 次重试"
+              sleep $((attempt * 5))
+            done
+            echo "::error::公网冒烟失败: $path => HTTP $code"
+            return 1
+          }
+          check /
+          check /404.html
+          check /sitemap.xml
+          check /robots.txt
+
+          # 安全头抽查：确认 nginx 配置真的生效，而不是只写了文件
+          hdr=$(curl -sSI --max-time 20 "${resolve[@]}" "$SITE_URL/" | tr -d '\r')
+          for h in strict-transport-security content-security-policy x-content-type-options \
+                   referrer-policy permissions-policy cache-control; do
+            if echo "$hdr" | grep -qi "^$h:"; then
+              echo "header ok: $h"
+            else
+              echo "::error::响应缺少 $h"
+              exit 1
+            fi
+          done
+
+      - name: Verify live release id
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2086
+          ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" \
+            "bash '$VPS_PATH/activate-release.sh' --check '${{ steps.release.outputs.release_id }}'"
+
+      - name: On failure show live version and rollback entry
+        if: failure()
+        run: |
+          set -uo pipefail
+          {
+            echo "## 部署未成功"
+            echo
+            echo "线上内容没有被半程改写（切流是符号链接原子替换），服务端冒烟失败会自动回滚。当前生效版本："
+            echo
+            echo '```'
+            # shellcheck disable=SC2086
+            ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" \
+              "bash $VPS_PATH/activate-release.sh --status; bash $VPS_PATH/activate-release.sh --list" || true
+            echo '```'
+            echo
+            echo "需要回退请使用 Actions 侧边栏的 **Rollback Treasure-House** 工作流。"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy summary
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          DEPLOY_NOTE: ${{ github.event.inputs.note }}
+          REL_ID: ${{ steps.release.outputs.release_id }}
+        run: |
+          {
+            echo "### Treasure-House 部署"
+            echo "- 结果: **$JOB_STATUS**"
+            echo "- Release: \`${REL_ID:-未切流}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- 触发: ${GITHUB_EVENT_NAME} by ${GITHUB_ACTOR}"
+            echo "- 备注: ${DEPLOY_NOTE:-}"
+            echo "- 站点: $SITE_URL"
+          } >> "$GITHUB_STEP_SUMMARY"

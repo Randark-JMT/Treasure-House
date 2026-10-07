@@ -1,0 +1,86 @@
+name: Rollback Treasure-House
+
+# 只切符号链接，不重新构建：releases/ 保留最近 5 份，秒级回退。
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: 目标 release（留空 = 回退到上一个版本）
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Switch release pointer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL }}
+
+    env:
+      VPS_PATH: ${{ vars.VPS_DEPLOY_PATH || '/var/www/html/treasure-house' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://treasure-house.randark.site' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            .github/actions
+
+      - name: Configure SSH credentials
+        id: ssh
+        uses: ./.github/actions/vps-ssh-setup
+        with:
+          private_key: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          known_hosts: ${{ vars.VPS_SSH_KNOWN_HOSTS }}
+          host: ${{ vars.VPS_HOST }}
+          port: ${{ vars.VPS_SSH_PORT || '22' }}
+          user: ${{ vars.VPS_USER || 'treasure-deploy' }}
+          key_alias: ${{ vars.VPS_HOST_KEY_ALIAS || 'treasure-house-deploy' }}
+
+      - name: Available releases
+        run: |
+          set -euo pipefail
+          {
+            echo "## 可回退版本（最新在前）"
+            echo '```'
+            # shellcheck disable=SC2086
+            ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" \
+              "bash '$VPS_PATH/activate-release.sh' --status; echo; bash '$VPS_PATH/activate-release.sh' --list"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Switch pointer
+        env:
+          TARGET: ${{ github.event.inputs.release_id }}
+        run: |
+          set -euo pipefail
+          if [ -n "$TARGET" ]; then
+            mode=(--use "$TARGET")
+          else
+            mode=(--rollback)
+          fi
+          # shellcheck disable=SC2086
+          ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" \
+            "env BASE='$VPS_PATH' bash '$VPS_PATH/activate-release.sh' ${mode[*]}"
+
+      - name: Verify from public endpoint
+        env:
+          SMOKE_IP: ${{ vars.VPS_PUBLIC_IP }}
+        run: |
+          set -euo pipefail
+          site_host=$(sed -E 's#https?://([^/:]+).*#\1#' <<<"$SITE_URL")
+          resolve=()
+          [ -n "$SMOKE_IP" ] && resolve=(--resolve "$site_host:443:$SMOKE_IP")
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "${resolve[@]}" "$SITE_URL/" || echo 000)
+          echo "GET / => HTTP $code"
+          [ "$code" = 200 ] || { echo "::error::回退后首页不可用"; exit 1; }

@@ -12,7 +12,9 @@ const config = {
     favicon: 'img/favicon.ico',
 
     // Set the production url of your site here
-    url: 'http://treasure-house.randark.site',
+    // 部署已迁移到 VPS（nginx + Let's Encrypt），必须使用 https，
+    // 否则 sitemap / canonical / og 标签会把用户与爬虫导向明文端口。
+    url: 'https://treasure-house.randark.site',
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',

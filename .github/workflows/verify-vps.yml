@@ -1,0 +1,98 @@
+name: Verify Treasure-House
+
+# 只读探测，不改动任何东西：用于证书扩展、DNS 割接、nginx 改配置之后确认现状。
+on:
+  workflow_dispatch:
+  schedule:
+    # 每 6 小时：站点不可用或证书临期时由 GitHub 通知（checks 失败邮件）
+    - cron: '23 */6 * * *'
+
+permissions: {}
+
+concurrency:
+  group: vps-verify
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Read-only probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      VPS_PATH: ${{ vars.VPS_DEPLOY_PATH || '/var/www/html/treasure-house' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://treasure-house.randark.site' }}
+
+    steps:
+      - name: Configure SSH credentials
+        id: ssh
+        env:
+          INPUT_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          INPUT_KNOWN: ${{ vars.VPS_SSH_KNOWN_HOSTS }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_PORT: ${{ vars.VPS_SSH_PORT || '22' }}
+          VPS_USER: ${{ vars.VPS_USER || 'treasure-deploy' }}
+          HOST_ALIAS: ${{ vars.VPS_HOST_KEY_ALIAS || 'treasure-house-deploy' }}
+        run: |
+          set -euo pipefail
+          [ -n "$INPUT_KEY" ]   || { echo "::error::secrets.VPS_DEPLOY_SSH_KEY 为空"; exit 1; }
+          [ -n "$INPUT_KNOWN" ] || { echo "::error::vars.VPS_SSH_KNOWN_HOSTS 为空"; exit 1; }
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$INPUT_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$INPUT_KNOWN" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+          opts="-i $HOME/.ssh/id_deploy -p $VPS_PORT -o BatchMode=yes -o IdentitiesOnly=yes"
+          opts="$opts -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          opts="$opts -o HostKeyAlias=$HOST_ALIAS -o ConnectTimeout=15 -o IPQoS=throughput"
+          echo "ssh_opts=$opts" >> "$GITHUB_OUTPUT"
+          echo "dest=$VPS_USER@$VPS_HOST" >> "$GITHUB_OUTPUT"
+
+      - name: Server-side state
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2086
+          ssh ${{ steps.ssh.outputs.ssh_opts }} "${{ steps.ssh.outputs.dest }}" \
+            "bash '$VPS_PATH/activate-release.sh' --status; echo '--- releases ---'; bash '$VPS_PATH/activate-release.sh' --list"
+
+      - name: HTTP + headers + TLS
+        run: |
+          set -uo pipefail
+          site_host=$(sed -E 's#https?://([^/:]+).*#\1#' <<<"$SITE_URL")
+          bad=0
+          echo "### 路径探测"
+          for path in / /blog/ /sitemap.xml /robots.txt /404.html; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 "$SITE_URL$path" || echo 000)
+            printf '%-16s HTTP %s\n' "$path" "$code"
+            case "$code" in
+              000|429|5[0-9][0-9]) echo "::error::$path 异常（$code）"; bad=1 ;;
+            esac
+          done
+
+          echo "### 安全头"
+          hdr=$(curl -sSI --max-time 25 "$SITE_URL/" | tr -d '\r')
+          echo "$hdr" | grep -iE '^(strict-transport-security|content-security-policy|x-content-type-options|referrer-policy|permissions-policy|cache-control):' || true
+          for h in strict-transport-security content-security-policy x-content-type-options referrer-policy; do
+            echo "$hdr" | grep -qi "^$h:" || { echo "::error::响应缺少 $h"; bad=1; }
+          done
+
+          echo "### 80 -> 443 跳转"
+          loc=$(curl -sS -o /dev/null -w '%{redirect_url}' --max-time 25 "http://$site_host/" || echo none)
+          echo "http://$site_host/ => $loc"
+          case "$loc" in https://*) ;; *) echo "::error::80 端口未跳转 https"; bad=1 ;; esac
+
+          echo "### 证书剩余有效期"
+          peer=$(echo | timeout 25 openssl s_client -connect "$site_host:443" -servername "$site_host" 2>/dev/null || true)
+          enddate=$(printf '%s' "$peer" | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2 || true)
+          sans=$(printf '%s' "$peer" | openssl x509 -noout -ext subjectAltName 2>/dev/null | tr -d '\r' | grep -o 'DNS:[^,]*' | tr '\n' ' ' || true)
+          if [ -z "$enddate" ]; then
+            echo "::error::无法从 $site_host:443 读取证书（TLS 握手失败或 openssl 不可用）"
+            bad=1
+          else
+            end_epoch=$(date -d "$enddate" +%s)
+            days=$(( (end_epoch - $(date +%s)) / 86400 ))
+            echo "到期: $enddate（剩余 ${days} 天）"
+            echo "SAN : ${sans:-未知}"
+            grep -q "DNS:$site_host" <<<"$sans" || { echo "::error::证书 SAN 不包含 $site_host"; bad=1; }
+            [ "$days" -ge 14 ] || { echo "::error::证书剩余 ${days} 天，续签可能已失效"; bad=1; }
+          fi
+
+          exit "$bad"

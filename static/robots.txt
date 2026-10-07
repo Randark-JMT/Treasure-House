@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://treasure-house.randark.site/sitemap.xml
