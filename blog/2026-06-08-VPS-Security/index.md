@@ -5,9 +5,11 @@ authors: Randark
 tags: []
 ---
 
-安全配置记录
+服务器配置记录
 
 <!-- truncate -->
+
+## iptables
 
 允许已建立的连接（防止打断现有操作）
 
@@ -42,7 +44,7 @@ iptables -A INPUT -i eth0 -p tcp --dport 443 -j ACCEPT
 # 允许 Rustdesk
 iptables -A INPUT -i eth0 -p tcp --dport 21114:21119 -j ACCEPT
 # 插入 允许 Portainer Edge Compute
-iptables -I INPUT 8 -i eth0 -p tcp --dport 8000 -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp --dport 8000 -j ACCEPT
 ```
 
 允许指定的 UDP 端口 (21116)
@@ -60,13 +62,16 @@ iptables -A INPUT -i eth0 -j DROP
 持久化保存
 
 ```shell
+# 安装必要组件
+apt install iptables-persistent
+
 # Debian/Ubuntu
 iptables-save > /etc/iptables/rules.v4
 # CentOS/RHEL
 service iptables save
 ```
 
-## 检查配置
+### 检查配置
 
 ```shell
 root@jmt-projekt-replica1:~# iptables -v -n -L
@@ -291,4 +296,45 @@ num   pkts bytes target     prot opt in     out     source               destina
 3      674 42720 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:41641
 4        0     0 RETURN     all  --  !tailscale0 *       100.115.92.0/23      0.0.0.0/0           
 5        0     0 DROP       all  --  !tailscale0 *       100.64.0.0/10        0.0.0.0/0           
+```
+
+## 性能调优
+
+```shell
+# 查看磁盘占用
+root@jmt-projekt-replica1:~# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           392M  2.9M  389M   1% /run
+/dev/vda1        29G   14G   16G  48% /
+tmpfs           2.0G     0  2.0G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+/dev/vda15      105M  6.1M   99M   6% /boot/efi
+/dev/vdb1        59G   28G   28G  50% /data
+......
+```
+
+## 设置 Swap
+
+```shell
+# 创建一个 4G 的 swap 文件
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# 永久生效：在 /etc/fstab 末尾追加一行
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+具体交互
+
+```shell
+root@jmt-projekt-replica1:/# fallocate -l 4G /swapfile
+root@jmt-projekt-replica1:/# chmod 600 /swapfile
+root@jmt-projekt-replica1:/# mkswap /swapfile
+Setting up swapspace version 1, size = 4 GiB (4294963200 bytes)
+no label, UUID=f17b129e-80bd-4fc2-8000-2a52fc34e8b5
+root@jmt-projekt-replica1:/# swapon /swapfile
+root@jmt-projekt-replica1:/# echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+/swapfile none swap sw 0 0
 ```
