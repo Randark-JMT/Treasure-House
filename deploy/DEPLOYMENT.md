@@ -71,11 +71,21 @@ ssh-keygen -t ed25519 -C "treasure-house@github-actions" -f treasure_house_deplo
 **3.2 抓取并固定服务器 host key**（带外核对指纹，防 MITM）
 
 ```bash
-# 在服务器执行，抄下指纹
-ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-# 在你本机执行，把主机名字段替换成别名（与 vars.VPS_HOST_KEY_ALIAS 一致）
-ssh-keyscan -p 22 -t ed25519 8.129.29.180 | sed 's/^8\.129\.29\.180/treasure-house-deploy/' > known_hosts
+# 在服务器执行，抄下指纹（两个都要，known_hosts 里存哪种就必须能对上）
+sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+sudo ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
+
+# 在你本机执行。注意：ssh-keyscan 对非标准端口会把主机字段写成 [IP]:端口，
+# 必须整段替换成别名，否则 HostKeyAlias 永远查不到条目（首次部署就是这么失败的）
+ssh-keyscan -T 10 -p 12322 -t ed25519,rsa 8.129.29.180 \
+  | grep -v '^#' \
+  | sed -E 's/^\[[^ ]+\]:[0-9]+/treasure-house-deploy/' > known_hosts
+cat known_hosts   # 每行必须以「treasure-house-deploy ssh-...」开头
 ```
+
+标准 22 端口时 keyscan 输出的是裸 IP，`s/^8\.129\.29\.180/别名/` 也能work；上面这条对两种端口都成立。
+
+别名必须与 `vars.VPS_HOST_KEY_ALIAS` 完全一致。保留别名而不是 `[IP]:port` 的好处：换公网 IP 或改 SSH 端口时不用重新生成 known_hosts。
 
 **3.3 配置 GitHub 侧变量**（建议先建 `production` environment，把下列都设在 environment 级，便于加审批人）
 
@@ -265,5 +275,13 @@ sudo nginx -t && sudo systemctl reload nginx
 - 符号链接原子切流的真实行为（`mv -Tf` 覆盖 symlink）——Windows 无符号链接语义，自检里该函数被桩替换；Linux 上 `selftest.sh` 会自动使用真实实现，建议先在服务器跑一遍再走割接第 4 步。
 - `restrict` + `PermitTTY no` 与 rsync-over-ssh 的共存（预期可用，rsync 不需要 TTY）——第一次手动 `ssh -i ... rsync` 时确认。
 - certbot 扩 SAN 与阿里云安全组、备案状态。
+
+**首次真实部署的故障记录（2026-10-07，run 37571929781）**
+
+- 现象：`Preflight connectivity and disk` 退出 255 —— `No ED25519 host key is known for treasure-house-deploy and you have requested strict checking.`
+- 根因：服务器 SSH 端口是 `12322`，而 `ssh-keyscan` 对非标准端口把主机字段写成 `[8.129.29.180]:12322`；§3.2 原来的 `sed 's/^8\.129\.29\.180/treasure-house-deploy/'` 匹配不到带方括号的行，known_hosts 里因此没有别名条目，而 workflow 用 `HostKeyAlias=treasure-house-deploy` 查表必然落空。
+- 这是 fail-closed 的预期行为：host key 对不上就一条字节都不推，而不是退化成 `StrictHostKeyChecking=no`。链路本身是通的（TCP、KEX、认证协商都成功，日志走到了 `Permission denied (publickey)` 那一层才算 host key 通过）。
+- 修复：`vars.VPS_SSH_KNOWN_HOSTS` 改为别名形式（ed25519 + rsa 两行都存，避免服务端首选算法变化时再次落空）；§3.2 的 keyscan 命令已改成对两种端口都成立的写法；`.github/actions/vps-ssh-setup` 与 `verify-vps.yml` 现在连接前先断言别名条目存在，报错时直接打印正确的 keyscan 命令。
+- 带外核对基准（与服务器上 `ssh-keygen -lf /etc/ssh/ssh_host_*.pub` 比对）：ED25519 `SHA256:5gm6TXW34it4INcu1SPCWJTMqoHh25LUmmalCjdHfYA`，RSA `SHA256:ySNrz43rWuJr4WDk4yXVwJ+3705lao7Asdw2cNKDo/Y`。
 
 割接前建议在服务器上先跑一次：`bash deploy/scripts/selftest.sh`，再手动 `workflow_dispatch` 跑 Deploy to VPS。

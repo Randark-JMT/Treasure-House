@@ -43,6 +43,9 @@ runs:
       env:
         INPUT_KEY: ${{ inputs.private_key }}
         INPUT_KNOWN: ${{ inputs.known_hosts }}
+        HOST_ALIAS: ${{ inputs.key_alias }}
+        VPS_HOST: ${{ inputs.host }}
+        VPS_PORT: ${{ inputs.port }}
       run: |
         set -euo pipefail
         [ -n "$INPUT_KEY" ]   || { echo "::error::secrets.VPS_DEPLOY_SSH_KEY 为空"; exit 1; }
@@ -52,7 +55,19 @@ runs:
         chmod 600 ~/.ssh/id_deploy
         printf '%s\n' "$INPUT_KNOWN" > ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
-        ssh-keygen -lf ~/.ssh/known_hosts
+
+        # ssh 用 HostKeyAlias 指定的名字查表，known_hosts 里必须存在以该别名为首字段的行。
+        # 非标准端口时 ssh-keyscan 会输出 [IP]:端口，直接塞进来就永远匹配不上。
+        if ! grep -q "^${HOST_ALIAS} ssh-" ~/.ssh/known_hosts; then
+          echo "::error::known_hosts 中没有别名为 ${HOST_ALIAS} 的条目，host key 校验一定会失败。"
+          echo "现有行首字段：$(awk '{print $1}' ~/.ssh/known_hosts | grep -v '^#' | sort -u | tr '\n' ' ')"
+          echo "修复办法（本机执行后重新设置 vars.VPS_SSH_KNOWN_HOSTS）："
+          echo "  ssh-keyscan -T 10 -p ${VPS_PORT} -t ed25519,rsa ${VPS_HOST} | grep -v '^#' \\"
+          echo "    | sed -E 's/^\\[[^ ]+\\]:[0-9]+/${HOST_ALIAS}/' > known_hosts"
+          exit 1
+        fi
+        echo "known_hosts 命中别名 ${HOST_ALIAS}，条目指纹："
+        ssh-keygen -lf ~/.ssh/known_hosts | grep -F -- "${HOST_ALIAS}" || true
 
     - name: Build ssh options
       id: opts

@@ -40,6 +40,10 @@ jobs:
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$INPUT_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
           printf '%s\n' "$INPUT_KNOWN" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+          grep -q "^${HOST_ALIAS} ssh-" ~/.ssh/known_hosts || {
+            echo "::error::known_hosts 没有别名为 ${HOST_ALIAS} 的行；非标准端口下 ssh-keyscan 输出 [IP]:端口，需 sed -E 's/^\\[[^ ]+\\]:[0-9]+/${HOST_ALIAS}/'"
+            exit 1
+          }
           opts="-i $HOME/.ssh/id_deploy -p $VPS_PORT -o BatchMode=yes -o IdentitiesOnly=yes"
           opts="$opts -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
           opts="$opts -o HostKeyAlias=$HOST_ALIAS -o ConnectTimeout=15 -o IPQoS=throughput"
