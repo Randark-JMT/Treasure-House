@@ -1,8 +1,9 @@
 ---
 sidebar_position: 2
+sidebar_label: RHCE 9
 ---
 
-# RHCE
+# RHCE 9
 
 RHCE 建立在已经完成 RHCSA 培训及认证考试的基础上
 

@@ -1,8 +1,9 @@
 ---
 sidebar_position: 1
+sidebar_label: RHCSA 9
 ---
 
-# RHCSA
+# RHCSA 9
 
 RHCSA 的培训内容包含有两门课程：
 

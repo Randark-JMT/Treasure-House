@@ -4,7 +4,7 @@ sidebar_position: 0
 
 # 证书
 
-## [RHCSA](./RHCSA/) - Red Hat Certified System Administrator
+## [RHCSA 9](./RHCSA-9/) - Red Hat Certified System Administrator
 
 [RHCSA - 红帽认证系统管理员 - Red Hat Certified System Administrator](https://www.redhat.com/zh/services/certification/rhcsa)
 
@@ -31,7 +31,7 @@ RHCSA 认证专为以下人员设计：
 - 所持认证并非最新认证或即将变为非最新认证并希望再次获得 RHCE 认证的 RHCE
 - 想要证明自身具备容器技术基础专业知识的 DevOps 专业人员
 
-## [RHCE](./RHCE/) - Red Hat Certified Engineer
+## [RHCE 9](./RHCE-9/) - Red Hat Certified Engineer
 
 [RHCE - 红帽认证工程师 - Red Hat Certified Engineer](https://www.redhat.com/zh/services/certification/rhce)
 
