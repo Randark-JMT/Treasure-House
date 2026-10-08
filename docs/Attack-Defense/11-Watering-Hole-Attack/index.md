@@ -6,7 +6,7 @@
 
 ## Microsoft Exchange
 
-有关 Exchage 的基础知识，可以阅读 [Microsoft Exchange](docs/../../../DevSecOps/Microsoft%20Exchange/index.md)
+有关 Exchage 的基础知识，可以阅读 [Microsoft Exchange](/docs/DevSecOps/Product-Notes/Microsoft-Exchange/)
 
 对于 Exchage 用户最常见的环节，就是通过 OWA (Outlook Web Access) 访问邮件系统。攻击者可能会针对 OWA 进行水坑攻击。
 

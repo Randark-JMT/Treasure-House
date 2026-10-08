@@ -8,7 +8,7 @@
 
 [原始报告](https://resources.hackthebox.com/cyber-attack-readiness-report)
 
-[报告文件](./Hackthebox/../HTB_BusinessCTF22_report.pdf)
+[报告文件](./HTB_BusinessCTF22_report.pdf)
 
 ### Cyber attack readiness report 2023
 
@@ -16,7 +16,7 @@
 
 [原始报告](https://resources.hackthebox.com/cyber-attack-readiness-report-2023)
 
-[报告文件](./Hackthebox/../HTB_BusinessCTF23_report.pdf)
+[报告文件](./HTB_BusinessCTF23_report.pdf)
 
 ## 长亭
 

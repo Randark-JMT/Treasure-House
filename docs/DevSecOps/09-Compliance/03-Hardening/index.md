@@ -4,11 +4,11 @@
 
 ## 账户加固
 
-### [Windows 账户加固](./Account-Control/Windows)
+### [Windows 账户加固](./Account-Control/Windows.md)
 
 ## 日志策略
 
-### [Windows 日志策略](./Logging-Policies/Windows)
+### [Windows 日志策略](./Logging-Policies/Windows.md)
 
 ## Reference
 

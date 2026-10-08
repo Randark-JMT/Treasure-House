@@ -4,7 +4,7 @@ Docker 共有两个 API 系统，一个是本地 `daemon` 的 API 系统，常�
 
 由于 Docker 自身服务的特殊性质，需要使用如 `cgroup` 等 Linux 安全特性，所以 Docker 服务需要基于 root 权限进行运行。
 
-## [Docker Daemon API](/docs/DevSecOps/Containerization/Docker/Docker-Daemon-API.md) 未授权访问漏洞
+## [Docker Daemon API](/docs/DevSecOps/Containerization/Docker/Docker-Daemon-API) 未授权访问漏洞
 
 前置材料：[Docker Daemon API](/docs/DevSecOps/Containerization/Docker/Docker-Daemon-API)
 
