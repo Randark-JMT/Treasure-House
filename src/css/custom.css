@@ -4,6 +4,13 @@
  * work well for content-centric websites.
  */
 
+/*
+ * KaTeX 样式表由本地 node_modules 打包（版本自动跟随 rehype-katex 依赖的 katex），
+ * 不再走 jsdelivr CDN：避免版本错配，也避免境内访问外链阻塞渲染。
+ * 字体文件由 webpack 解析 url(fonts/...) 后一并输出到 build/assets。
+ */
+@import 'katex/dist/katex.min.css';
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #2e8555;
