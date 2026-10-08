@@ -1,3 +1,8 @@
+---
+sidebar_position: 5
+sidebar_label: GCB 政府組態基準
+---
+
 # Taiwan GCB
 
 核心负责机构，是数位发展部
