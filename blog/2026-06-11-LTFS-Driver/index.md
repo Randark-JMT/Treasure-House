@@ -1,4 +1,13 @@
-# 123
+---
+slug: 2026-06-11-LTFS-Driver
+title: HPE LTFS 驱动分析
+authors: Randark
+tags: [AI]
+---
+
+针对 HPE 较老的 LTFS 驱动程序进行分析
+
+<!-- truncate -->
 
 ## 检查证书状态
 
