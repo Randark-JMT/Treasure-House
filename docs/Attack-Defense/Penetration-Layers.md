@@ -28,7 +28,7 @@ sidebar_class_name: green
 
 在 `Delivery` 阶段，网络武器和其他网络杀伤链工具用于渗透目标网络并接触用户。 传递可能涉及包含恶意软件附件的网络钓鱼电子邮件 ，其主题行会提示用户点击。 交付还可以采取侵入组织网络并利用硬件或软件漏洞渗透的形式。
 
-### [Exploitation - 执行](/docs/Attack-Defense/Cyber-Kill-Chain/Exploitation/)
+### [Exploitation - 利用](/docs/Attack-Defense/Cyber-Kill-Chain/Exploitation/)
 
 `Exploitation` 是交付和武器化之后的阶段。 在网络杀伤链的利用步骤中，攻击者利用他们在前一阶段发现的漏洞进一步渗透目标网络并实现其目标。 在此过程中，网络犯罪分子通常会在网络中横向移动以达到他们的目标。 如果网络负责人没有部署欺骗措施，利用有时可能会将攻击者引向目标。
 
