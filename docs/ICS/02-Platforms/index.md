@@ -5,11 +5,11 @@ sidebar_label: 工控平台
 
 # 工控平台
 
-这一目录收设备与系统平台本身：它们各自负责什么、处在分层的哪一级、暴露哪些接口、固件与工程软件的版本差异如何影响结论。
+这一目录收设备与系统平台本身。写的时候盯四件事：各自负责什么、处在分层的哪一级、暴露哪些接口，以及固件与工程软件的版本差异会怎样改变结论。最后一条最容易被当成注脚跳过，可结论成不成立往往就取决于它。
 
 ## 分层参考
 
-现场普遍采用普渡模型（Purdue Model）描述层级，其标准化形式为 IEC 62264：
+现场普遍用普渡模型（Purdue Model）描述层级，它的标准化形式是 IEC 62264：
 
 | 层级 | 定位 | 典型平台 |
 |---|---|---|
@@ -21,9 +21,9 @@ sidebar_label: 工控平台
 | Level 4 | 企业经营 | ERP、供应链管理 |
 | Level 5 | 企业网络 | 办公网，不属于 IACS 范围 |
 
-历史数据库的层级归属在不同资料中不一致，常见于 Level 2 与 Level 3 之间；DCS 本身横跨 Level 1 与 Level 2，控制站在下、操作站在上。
+表上有两处边界是糊的。历史数据库的层级归属在不同资料里不一致，Level 2 与 Level 3 都见得到；DCS 本身横跨 Level 1 与 Level 2，控制站在下、操作站在上。拿这张表去对号入座之前，先确认手上这份资料把线画在哪。
 
-工程站（Engineering Workstation）不单独占一层，它横跨 Level 1 到 Level 3。编程与组态软件（如 Siemens TIA Portal、Rockwell Studio 5000、Omron CX-Programmer、Schneider Control Expert）通过厂商专有协议向 PLC 下载程序，这条通道的权限通常高于任何监控协议，是平台侧最需要单独立项的对象。
+工程站（Engineering Workstation）不单独占一层，它横跨 Level 1 到 Level 3。编程与组态软件（如 Siemens TIA Portal、Rockwell Studio 5000、Omron CX-Programmer、Schneider Control Expert）通过厂商专有协议向 PLC 下载程序，这条通道的权限通常高于任何监控协议——读写数据它能做，改程序它也能做。平台侧最需要单独立项的就是它。
 
 ## 收录范围
 
