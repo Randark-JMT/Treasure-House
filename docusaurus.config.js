@@ -97,27 +97,27 @@ const config = {
                 },
                 {
                     type: 'docSidebar',
-                    sidebarId: 'Penetration_Sidebar',
-                    position: 'left',
-                    label: '渗透测试',
-                },
-                {
-                    type: 'docSidebar',
                     sidebarId: 'AttackDefense_Sidebar',
                     position: 'left',
                     label: '红蓝攻防',
                 },
                 {
                     type: 'docSidebar',
-                    sidebarId: 'Compliance_Sidebar',
-                    position: 'left',
-                    label: '合规与基线',
-                },
-                {
-                    type: 'docSidebar',
                     sidebarId: 'ICS_Sidebar',
                     position: 'left',
                     label: '工业控制',
+                },
+                {
+                    type: 'docSidebar',
+                    sidebarId: 'Forensic_Sidebar',
+                    position: 'left',
+                    label: '电子取证',
+                },
+                {
+                    type: 'docSidebar',
+                    sidebarId: 'Lab_Sidebar',
+                    position: 'left',
+                    label: '靶场与实验',
                 },
                 {
                     type: 'docSidebar',
@@ -130,18 +130,6 @@ const config = {
                     sidebarId: 'CheatSheet_Sidebar',
                     position: 'left',
                     label: 'CheatSheet',
-                },
-                {
-                    type: 'docSidebar',
-                    sidebarId: 'OSINT_Sidebar',
-                    position: 'left',
-                    label: 'OSINT',
-                },
-                {
-                    type: 'docSidebar',
-                    sidebarId: 'CTF_Sidebar',
-                    position: 'left',
-                    label: 'CTF研究',
                 },
                 {
                     href: '/blog',
