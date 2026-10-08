@@ -1,11 +1,106 @@
-.features {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
+/**
+ * 首页 hero 之下两个区块的样式。
+ * 全部颜色走 Docusaurus 的 CSS 变量（--ifm-*），深色模式下不需要单独适配。
+ */
+
+.section {
+    padding: 3rem 0 2rem;
 }
 
-.featureSvg {
-  height: 200px;
-  width: 200px;
+.inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
+    color: var(--ifm-color-content);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--ifm-color-emphasis-200);
+    border-radius: var(--ifm-global-radius);
+    background: var(--ifm-card-background-color);
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+    border-color: var(--ifm-color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+}
+
+.cardName {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ifm-color-content);
+}
+
+.card:hover .cardName,
+.card:focus-visible .cardName {
+    color: var(--ifm-color-primary);
+}
+
+.cardDesc {
+    flex: 1 1 auto;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--ifm-color-content-secondary);
+}
+
+.cardEnter {
+    font-size: 0.85rem;
+    color: var(--ifm-color-primary);
+}
+
+.moreLink {
+    margin: 1.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--ifm-color-content-secondary);
+}
+
+.moreLink a {
+    margin: 0 0.25rem;
+}
+
+.conventionList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.conventionItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.conventionItem strong {
+    font-size: 0.95rem;
+    color: var(--ifm-color-content);
+}
+
+.conventionItem span {
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--ifm-color-content-secondary);
 }

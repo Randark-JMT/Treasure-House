@@ -21,8 +21,33 @@
     }
 }
 
+.heroIntro {
+    max-width: 40rem;
+    margin: 0 auto 1.75rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    opacity: 0.92;
+}
+
 .buttons {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* hero 背景是深色照片，Infima 的 outline 按钮文字色不会自动变白，
+   且 .button 基础类 border-width 为 0（outline 变体只改颜色不改宽度），
+   实测在图上既看不见边框也看不见文字，这里显式补齐 */
+.outlineLight {
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.outlineLight:hover,
+.outlineLight:focus-visible {
+    color: #fff;
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.12);
 }
